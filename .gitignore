@@ -34,3 +34,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# secrets
+sqrchat-e7443-firebase-adminsdk-1yvuf-bd2ac9e01a.json
