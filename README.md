@@ -16,3 +16,5 @@ SQRChat's goal is to ensure secure team collaboration without serving as an exte
 - cd frontend
 - npm install (if any new dependencies)
 - npx expo start
+
+## THIS IS A TEST EDIT
