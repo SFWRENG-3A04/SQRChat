@@ -3,15 +3,21 @@ import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
-  signInWithPopup,
   onAuthStateChanged,
   GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
 import { getDatabase, ref, set, onValue, off } from "firebase/database";
 import Login from '../components/Login';
 import Home from '../components/Home';
 
+// firebase/auth signInWithPopup doesn't work on RN, need to follow this:
+// https://react-native-google-signin.github.io/docs/setting-up/expo
+// https://react-native-google-signin.github.io/docs/setting-up/get-config-file
+// update: this is a lot, you need to setup RN on ios and android and configure it
+// instead we will just store email and password
 
 const firebaseConfig = {
   apiKey: "AIzaSyCTNx0cnXkVMjHmIcCBqPnGdAKd5UooaDM",
@@ -56,24 +62,49 @@ export default function LandingScreen({navigation}) {
     });
   }, []);
 
-  const logIn = async (e) => {
-    console.log("here")
-    try {
-      await signInWithPopup(auth, provider);
-      // Login successful
-    } catch (error) {
-      console.error("Error during login:", error.message);
-    }
+  const logIn = async (email, password) => {
+    signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed in 
+      const user = userCredential.user;
+      // ...
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+    });
+
+  };
+
+  const signUp = async (email, password) => {
+    console.log(email, password)
+    createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed up 
+      const user = userCredential.user;
+      // ...
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+    });
   };
 
   const logOut = async (e) => {
-    await signOut(auth);
+    await signOut(auth).then(() => {
+      // Sign-out successful.
+    }).catch((error) => {
+      // An error happened.
+      console.log(error)
+    });
   };
 
   return (
     <View style={styles.container}>
       {loggedIn == null ? null : !loggedIn ? (
-        <Login user={user} uid={uid} db={db} logIn={logIn} />
+        <Login user={user} uid={uid} db={db} logIn={logIn} signUp={signUp} />
       ) : (
         <Home user={user} uid={uid} db={db} logOut={logOut} />
       )}
