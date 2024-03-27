@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "retina-scanner",
-    "slug": "retina-scanner",
+    "name": "SQRChat",
+    "slug": "SQRChat",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
