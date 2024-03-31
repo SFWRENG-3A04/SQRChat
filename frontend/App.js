@@ -3,11 +3,13 @@ import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+// import { NativeBaseProvider } from "native-base";
 
 import LandingScreen from './screens/LandingScreen';
 import ScanningScreen from './screens/ScanningScreen';
-import HistoryScreen from './screens/HistoryScreen';
-import EducationScreen from './screens/EducationScreen';
+import MessagesScreen from './screens/MessagesScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
 
 const Tab = createBottomTabNavigator();
@@ -23,19 +25,24 @@ export default function App() {
           options={{title: 'Welcome'}}
         />
         <Tab.Screen 
-          name="Profile" 
+          name="Scanning" 
           component={ScanningScreen} 
           options={{title: 'Scanning'}}
         />
         <Tab.Screen 
-          name="History" 
-          component={HistoryScreen} 
-          options={{title: 'History and Results'}}
+          name="Messages" 
+          component={MessagesScreen} 
+          options={{title: 'Messages Title'}}
         />
         <Tab.Screen 
           name="Education" 
-          component={EducationScreen} 
-          options={{title: 'Learn More!'}}
+          component={SettingsScreen} 
+          options={{title: 'Settings Title'}}
+        />
+        <Tab.Screen 
+          name="Profile" 
+          component={ProfileScreen} 
+          options={{title: 'Profile Title'}}
         />
       </Tab.Navigator>
     </NavigationContainer>
