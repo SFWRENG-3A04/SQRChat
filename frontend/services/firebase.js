@@ -30,5 +30,4 @@ const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
 provider.addScope("https://www.googleapis.com/auth/userinfo.profile");
 
-
 export { app, auth, db, getApp, getAuth };
