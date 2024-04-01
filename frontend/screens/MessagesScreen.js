@@ -1,27 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import SelectDMScreen from './SelectDMScreen';
+import DMScreen from './DMScreen';
+
+const Stack = createNativeStackNavigator();
 
 export default function MessagesScreen({route, navigation}) {
+  // const [groupChats, setGroupChats] = useState([])
+  // const [dms, setDms] = useState([])
 
-  useEffect(() => {
-    navigation.setOptions({
-      title: `Team Test`,
-      headerLeft: () => (
-        <Button title="Confirm"
-          onPress={() =>
-            navigation.push('FinalTeams', {
-              numOfTeams: 2,
-              currTeam: 1,
-            })}
-        />)
-    }
-  )}, [navigation]);
-  
+  // useEffect(() => {
+  //   setGroupChats([
+  //     { id: 1, name: "Group Chat 1" },
+  //     { id: 2, name: "Group Chat 2" },
+  //     { id: 3, name: "Group Chat 3" },
+  //   ]);
+  // }, []);
+
   return (
-
-    <View style={styles.container}>
-      <Text>Messages</Text>
-    </View>
+    <Stack.Navigator initialRouteName="SelectDM">
+      <Stack.Screen name="SelectDM" component={SelectDMScreen} //initialParams={{ 'groupChats': groupChats, 'setGroupChats': setGroupChats, 'dms': dms, 'setDms': setDms}}
+        options={({ route, navigation }) => ({
+          title: 'Messages',
+          headerRight: () => (
+            <Button title="DMs" 
+              onPress={() => navigation.push('DM')}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen name="DM" component={DMScreen} />
+    </Stack.Navigator>
   );
 }
 
