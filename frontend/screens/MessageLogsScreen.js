@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function DMScreen({ route }) {
+export default function MessageLogsScreen({ route }) {
   const { chatDetails } = route.params;
 
   return (

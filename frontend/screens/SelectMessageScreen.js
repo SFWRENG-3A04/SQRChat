@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Chat from '../components/Chat';
 
-export default function SelectDMScreen({ navigation }) {
+export default function SelectMessageScreen({ navigation }) {
   const [groupChats, setGroupChats] = useState([]);
   const [dms, setDms] = useState([]);
 
@@ -20,7 +20,7 @@ export default function SelectDMScreen({ navigation }) {
   }, []);
 
   const handleChatSelected = (chat) => {
-    navigation.navigate('DM', { chatDetails: chat });
+    navigation.navigate('MessageLogs', { chatDetails: chat });
   };
 
   return (

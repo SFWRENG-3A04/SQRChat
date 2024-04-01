@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import SelectDMScreen from './SelectDMScreen';
-import DMScreen from './DMScreen';
+import SelectMessageScreen from './SelectMessageScreen';
+import MessageLogsScreen from './MessageLogsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,18 +19,18 @@ export default function MessagesScreen({route, navigation}) {
   // }, []);
 
   return (
-    <Stack.Navigator initialRouteName="SelectDM">
-      <Stack.Screen name="SelectDM" component={SelectDMScreen} //initialParams={{ 'groupChats': groupChats, 'setGroupChats': setGroupChats, 'dms': dms, 'setDms': setDms}}
+    <Stack.Navigator initialRouteName="SelectMessage">
+      <Stack.Screen name="SelectMessage" component={SelectMessageScreen} //initialParams={{ 'groupChats': groupChats, 'setGroupChats': setGroupChats, 'dms': dms, 'setDms': setDms}}
         options={({ route, navigation }) => ({
           title: 'Messages',
           headerRight: () => (
-            <Button title="DMs" 
-              onPress={() => navigation.push('DM')}
+            <Button title="Forward" 
+              onPress={() => navigation.push('MessageLogs', { chatDetails: "Forward button was hit" })}
             />
           ),
         })}
       />
-      <Stack.Screen name="DM" component={DMScreen} />
+      <Stack.Screen name="MessageLogs" component={MessageLogsScreen} />
     </Stack.Navigator>
   );
 }
