@@ -23,4 +23,16 @@ const getUser = (uid) => {
   }
 }
 
-export { getChats, getUser };
+const sendMessage = (chatId, message) => {
+  const chatIndex = chats.groupChats.findIndex(chat => chat.chatId === chatId);
+  if (chatIndex !== -1) {
+    chats.groupChats[chatIndex].messages.push(message);
+  } else {
+    const dmIndex = chats.directMessages.findIndex(chat => chat.chatId === chatId);
+    if (dmIndex !== -1) {
+      chats.directMessages[dmIndex].messages.push(message);
+    }
+  }
+};
+
+export { getChats, getUser, sendMessage };

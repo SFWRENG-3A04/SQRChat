@@ -1,74 +1,83 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { getUser } from '../mock/functions'; // Adjust the import path as needed
+// Adjustments within MessageLogsScreen component
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import Messages from '../components/Messages';
+import { sendMessage } from '../mock/functions';
 
 export default function MessageLogsScreen({ route }) {
   const { chatDetails } = route.params;
   const currentUserUid = "1";
+  const [messageText, setMessageText] = useState('');
 
-  // Function to get a message sender's name by their UID
-  const getSenderName = (uid) => {
-    const user = getUser(uid);
-    return user ? user.name : 'Unknown';
+  const handleMessageSend = () => {
+    if (messageText.trim()) {
+      const newMessage = {
+        senderUid: "1", // Assuming "1" is the UID of the current user
+        text: messageText.trim()
+      };
+  
+      sendMessage(chatDetails.chatId, newMessage);
+      setMessageText('');
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.chatHeader}>{chatDetails.chatId}</Text>
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 135 : 0}
+    >
       <ScrollView style={styles.messageContainer}>
-        {chatDetails.messages.map((message, index) => (
-          <View
-            key={index}
-            style={[
-              styles.messageBubble,
-              message.senderUid === currentUserUid ? styles.rightBubble : styles.leftBubble,
-            ]}
-          >
-            {/* Adding the sender's name above the message */}
-            <Text style={styles.senderName}>{getSenderName(message.senderUid)}</Text>
-            <Text style={styles.messageText}>{message.text}</Text>
-          </View>
-        ))}
+        <Messages messages={chatDetails.messages} currentUserUid={currentUserUid} />
       </ScrollView>
-    </View>
+      <View style={styles.inputContainer}>
+        <TextInput
+          value={messageText}
+          onChangeText={setMessageText}
+          placeholder="Type a message..."
+          style={styles.input}
+        />
+        <TouchableOpacity onPress={handleMessageSend} style={styles.sendButton}>
+          <Text style={styles.sendButtonText}>Send</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-  },
-  chatHeader: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    alignSelf: 'center',
+    justifyContent: 'space-between',
   },
   messageContainer: {
-    flex: 1,
+    // might need flex here
   },
-  messageBubble: {
+  inputContainer: {
+    flexDirection: 'row',
     padding: 10,
-    borderRadius: 20,
-    marginVertical: 4,
-    maxWidth: '80%',
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
   },
-  rightBubble: {
-    backgroundColor: '#007bff',
-    alignSelf: 'flex-end',
+  input: {
+    flex: 1,
     marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
   },
-  leftBubble: {
-    backgroundColor: '#e5e5ea',
-    alignSelf: 'flex-start',
-    marginLeft: 10,
+  sendButton: {
+    justifyContent: 'center',
+    padding: 10,
+    backgroundColor: '#007bff',
+    borderRadius: 20,
   },
-  senderName: {
-    fontWeight: 'bold',
-    marginBottom: 2, // Give some space between the sender's name and their message
-  },
-  messageText: {
-    color: 'black',
+  sendButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
   },
 });
