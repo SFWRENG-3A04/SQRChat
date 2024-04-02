@@ -26,21 +26,12 @@ export default function LandingScreen({ setLoggedIn, setIsAdmin }) {
               name: userAuth.displayName,
             });
           }
-        });
 
-        get(ref(db, "Accounts/" + userAuth.uid))
-          .then((snapshot) => {
-            const isAdmin = snapshot.exists() && snapshot.val().is_admin;
-            if (isAdmin !== undefined) {
-              setIsAdmin(isAdmin);
-            } else {
-              console.log("is_admin field does not exist or is undefined");
-              // Handle the case when the is_admin field doesn't exist or is undefined
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-          });
+          const isAdmin = snapshot.exists() && snapshot.val().is_admin;
+          if (isAdmin !== undefined) {
+            setIsAdmin(isAdmin);
+          }
+        });
       } else {
         // User is signed out
         setLoggedIn(false);
