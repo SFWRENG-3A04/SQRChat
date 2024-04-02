@@ -3,7 +3,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { getAuth } from "../services/firebase";
+import { getAuth, db } from "../services/firebase";
+import { ref, set } from "firebase/database";
+
 
 const auth = getAuth();
 
@@ -23,6 +25,13 @@ const logIn = async (email, password) => {
 
 };
 
+const addUserToDb = async (uid, displayName) => {
+  set(ref(db, "users/" + uid), {
+    is_admin: false,
+    name: displayName
+  });
+}
+
 const signUp = async (email, password) => {
   console.log(email, password)
   createUserWithEmailAndPassword(auth, email, password)
@@ -30,6 +39,8 @@ const signUp = async (email, password) => {
     // Signed up 
     const user = userCredential.user;
     // ...
+    addUserToDb(user.uid, user.displayName)
+    
     console.log("signUp", user)
   })
   .catch((error) => {

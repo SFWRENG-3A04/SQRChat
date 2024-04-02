@@ -18,6 +18,7 @@ export default function ManageUsersScreen({ route }) {
   const backendEndpoint = Constants.expoConfig.extra.backendEndpoint;
 
   const fetchData = () => {
+    console.log("attempt to fetch user list")
     axios
       .get(`http://${backendEndpoint}/get_user_list`)
       .then((response) => {
@@ -38,6 +39,7 @@ export default function ManageUsersScreen({ route }) {
   }, []);
 
   const handleUserDelete = (userId) => {
+    console.log("attempt to delete " + userId)
     axios
       .delete(`http://${backendEndpoint}/delete_user/${userId}`)
       .then(() => {
