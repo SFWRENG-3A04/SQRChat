@@ -25,7 +25,7 @@ export default function MessagesScreen({route, navigation}) {
           title: 'Messages',
           headerRight: () => (
             <Button title="Forward" 
-              onPress={() => navigation.push('MessageLogs', { chatDetails: "Forward button was hit" })}
+              onPress={() => navigation.push('MessageLogs', { chatDetails: {id: "lol", name: "Forward button was hit"} })}
             />
           ),
         })}
