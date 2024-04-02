@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import {
-  onAuthStateChanged,
-} from "firebase/auth";
-import { ref, set, onValue } from "firebase/database";
-import Login from '../components/Login';
+import React, { useState, useEffect } from "react";
+import { StyleSheet, View } from "react-native";
+import { onAuthStateChanged } from "firebase/auth";
+import { ref, get, set, onValue } from "firebase/database";
+import Login from "../components/Login";
 import { app, db, getAuth } from "../services/firebase";
-import { logIn, logOut, signUp } from '../services/login';
+import { logIn, logOut, signUp } from "../services/login";
 
-export default function LandingScreen({ setLoggedIn }) {
+export default function LandingScreen({ setLoggedIn, setIsAdmin }) {
   const [user, setUser] = useState(null);
   const [uid, setUID] = useState(null);
   const auth = getAuth();
@@ -29,6 +27,20 @@ export default function LandingScreen({ setLoggedIn }) {
             });
           }
         });
+
+        get(ref(db, "Accounts/" + userAuth.uid))
+          .then((snapshot) => {
+            const isAdmin = snapshot.exists() && snapshot.val().is_admin;
+            if (isAdmin !== undefined) {
+              setIsAdmin(isAdmin);
+            } else {
+              console.log("is_admin field does not exist or is undefined");
+              // Handle the case when the is_admin field doesn't exist or is undefined
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+          });
       } else {
         // User is signed out
         setLoggedIn(false);
@@ -46,15 +58,15 @@ export default function LandingScreen({ setLoggedIn }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   input: {
     height: 40,
     margin: 12,
     borderWidth: 1,
     padding: 10,
-    width: '80%',
+    width: "80%",
   },
 });
