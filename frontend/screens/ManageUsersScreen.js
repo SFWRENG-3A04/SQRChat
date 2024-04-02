@@ -21,7 +21,10 @@ export default function ManageUsersScreen({ route }) {
     axios
       .get(`http://${backendEndpoint}/get_user_list`)
       .then((response) => {
-        setUsers(response.data);
+        const filteredUsers = response.data.filter(
+          (user) => user.uid !== auth.currentUser.uid
+        );
+        setUsers(filteredUsers);
         setRefreshing(false); // After data is fetched, set refreshing to false
       })
       .catch((error) => {
@@ -32,7 +35,6 @@ export default function ManageUsersScreen({ route }) {
 
   useEffect(() => {
     fetchData();
-    console.log(auth.uid);
   }, []);
 
   const handleUserDelete = (userId) => {
