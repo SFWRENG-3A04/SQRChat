@@ -3,6 +3,7 @@ const chats = {
     {
       "chatId": "groupChat1",
       "participants": ["1", "2", "3"],
+      "lastUpdated": 1712035800,
       "messages": [
         {
           "senderUid": "1",
@@ -23,6 +24,7 @@ const chats = {
     {
       "chatId": "dmChat1",
       "participants": ["1", "2"],
+      "lastUpdated": 1710921600,
       "messages": [
         {
           "senderUid": "1",
@@ -41,6 +43,7 @@ const chats = {
     {
       "chatId": "dmChat2",
       "participants": ["2", "3"],
+      "lastUpdated": 1711936800,
       "messages": [
         {
           "senderUid": "2",

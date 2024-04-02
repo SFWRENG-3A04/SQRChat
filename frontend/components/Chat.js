@@ -7,7 +7,7 @@ const Chat = ({ groupChats, onChatSelected }) => {
   const getUserNames = (participants) => {
     return participants.map(uid => {
       const user = getUser(uid);
-      return user ? user.name : 'Unknown';
+      return user ? user.displayName : 'Unknown';
     }).join(', ');
   };
 
@@ -19,9 +19,9 @@ const Chat = ({ groupChats, onChatSelected }) => {
           onPress={() => onChatSelected(chat)}
           style={styles.buttonStyle}
         >
-          <Text style={styles.chatNameStyle}>{chat.name || "Chat"}</Text>
+          <Text style={styles.chatNameStyle}>{chat.displayName || "Chat"}</Text>
           <Text style={styles.participantsStyle}>
-            Participants: {getUserNames(chat.participants)}
+            {getUserNames(chat.participants)}
           </Text>
         </TouchableOpacity>
       ))}

@@ -33,7 +33,7 @@ export default function SelectMessageScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text>Select DMs</Text>
+      <Text>Select Message</Text>
       <Chat groupChats={groupChats} onChatSelected={handleChatSelected} />
       {/* <Chat groupChats={dms} onChatSelected={handleChatSelected} /> */}
     </View>

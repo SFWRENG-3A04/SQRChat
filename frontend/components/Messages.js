@@ -5,7 +5,7 @@ import { getUser } from '../mock/functions';
 export default function Messages({ messages, currentUserUid }) {
   const getSenderName = (uid) => {
     const user = getUser(uid);
-    return user ? user.name : 'Unknown';
+    return user ? user.displayName : 'Unknown';
   };
 
   return (
