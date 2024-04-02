@@ -3,14 +3,13 @@ from flask_cors import CORS
 import base64
 from PIL import Image
 from io import BytesIO
-import firebase_admin
-from firebase_admin import credentials, auth
+from firebase_admin import credentials, auth, initialize_app
 
 app = Flask(__name__)
 CORS(app)
 
 cred = credentials.Certificate("./secrets/serviceAccountKey.json")
-firebase = firebase_admin.initialize_app(cred)
+firebase = initialize_app(cred)
 
 @app.route('/ping/<int:id>', methods=['GET'])
 def ping_pong(id):
