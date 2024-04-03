@@ -22,9 +22,9 @@ export default function ScanningScreen({navigation}) {
   // this function is in shambles
   const permisionFunction = async () => {
     // here is how you can get the camera permission
-    // const cameraPermission = await Camera.getCameraPermissionsAsync();
+    const cameraPermission = await Camera.getCameraPermissionsAsync();
     
-    // setCameraPermission(cameraPermission.status === 'granted');
+    setCameraPermission(cameraPermission.status === 'granted');
 
     const imagePermission = await ImagePicker.getMediaLibraryPermissionsAsync();
     // console.log("image: " + imagePermission.status);

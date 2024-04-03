@@ -7,14 +7,26 @@ const ProfileHeader = ({ onToggleAvailability }) => {
   const [isAvailable, setIsAvailable] = useState(false);
   const [image, setImage] = useState(null);
   const bottomSheetRef = useRef(null);
+  const [cameraPermission, setCameraPermission] = Camera.useCameraPermissions();
+  const [galleryPermission, setGalleryPermission] = useState(null);
+
+  const permisionFunction = async () => {
+    await Camera.requestMediaLibraryPermissionsAsync()
+    const cameraPermission = await Camera.getCameraPermissionsAsync();
+    setCameraPermission(cameraPermission.status === 'granted');
+    await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const imagePermission = await ImagePicker.getMediaLibraryPermissionsAsync();
+    setGalleryPermission(imagePermission.status === 'granted');
+    // if (
+    //   imagePermission.status !== 'granted' ||
+    //   cameraPermission.status !== 'granted'
+    // ) {
+    //   alert('Permission for media access needed.');
+    // }
+  };
 
   useEffect(() => {
-    (async () => {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Sorry, camera roll permissions required.');
-      }
-    })();
+    permisionFunction();
   }, []);
 
   const toggleSwitch = () => {
