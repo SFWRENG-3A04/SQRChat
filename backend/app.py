@@ -4,9 +4,11 @@ import base64
 from PIL import Image
 from io import BytesIO
 from firebase_admin import credentials, auth, initialize_app
+from flask_socketio import SocketIO, join_room, send
 
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app)
 
 cred = credentials.Certificate("./secrets/serviceAccountKey.json")
 firebase = initialize_app(cred)
@@ -14,6 +16,17 @@ firebase = initialize_app(cred)
 @app.route('/ping/<int:id>', methods=['GET'])
 def ping_pong(id):
   return 'pong ' + str(id+1)
+
+@socketio.on('joinRoom')
+def handle_join_room(room):
+    join_room(room)
+    print(f"Socket {request.sid} joined room {room}")
+
+@socketio.on('sendMessage')
+def handle_send_message(message):
+  room = message['chatId']
+  send(message, room=room)
+  print(f"Message sent to room {room}: {message}")
 
 @app.route('/get_user_list', methods=['GET'])
 def getUserList():
@@ -39,4 +52,4 @@ def upload_image():
   return jsonify({'message': 'Image received successfully'}), 200
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=80)
+  socketio.run(app, host='0.0.0.0', port=80, debug=True)
