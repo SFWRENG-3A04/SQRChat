@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import ProfileHeader from '../components/profileComponents/profileHeader';
 
-export default function ProfileScreen({navigation}) {
+export default function ProfileScreen({ navigation }) {
+  // Handler function when toggling availability
+  const onToggleAvailability = (isAvailable) => {
+    console.log(isAvailable ? 'Available' : 'Not available');
+  };
 
   return (
     <View style={styles.container}>
-      <Text>Profile</Text>
+      <ProfileHeader onToggleAvailability={onToggleAvailability} />
     </View>
   );
 }
@@ -15,13 +20,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    width: '80%',
+    justifyContent: 'flex-start',
   },
 });
