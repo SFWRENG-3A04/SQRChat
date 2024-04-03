@@ -1,7 +1,7 @@
 import { initializeApp, getApp } from "firebase/app";
 import { initializeAuth, getAuth, getReactNativePersistence, GoogleAuthProvider } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import { getDatabase } from "firebase/database";
+import { getDatabase, ref, set } from "firebase/database";
 
 
 // firebase/auth signInWithPopup doesn't work on RN, need to follow this:
@@ -30,4 +30,4 @@ const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
 provider.addScope("https://www.googleapis.com/auth/userinfo.profile");
 
-export { app, auth, db, getApp, getAuth };
+export { app, auth, db, ref, set, getApp, getAuth };
