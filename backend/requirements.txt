@@ -1,2 +1,4 @@
 Flask
 flask-cors
+Pillow
+firebase_admin
