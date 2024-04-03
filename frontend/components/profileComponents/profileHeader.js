@@ -1,34 +1,62 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Image, Switch, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import ImagePicker from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker';
 
 const ProfileHeader = ({ onToggleAvailability }) => {
   const [isAvailable, setIsAvailable] = useState(false);
+  const [image, setImage] = useState(null);
   const bottomSheetRef = useRef(null);
 
+  useEffect(() => {
+    (async () => {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Sorry, camera roll permissions required.');
+      }
+    })();
+  }, []);
+
   const toggleSwitch = () => {
-    setIsAvailable(previousState => !previousState);
+    setIsAvailable(prevState => !prevState);
     onToggleAvailability && onToggleAvailability(!isAvailable);
   };
 
-  const takePhotoFromCamera = () => {
-    ImagePicker.launchCamera({}, (response) => {
-      // Handle camera photo capture here
-    });
-  };
+    const takePhotoCamera = async () => {
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
 
-  const choosePhotoFromLibrary = () => {
-    ImagePicker.launchImageLibrary({}, (response) => {
-      // Handle image library selection here
-    });
-  };
+        if (!result.cancelled && result.assets && result.assets.length > 0) {
+            setImage(result.assets[0].uri);
+        } else {
+            console.log('Camera picking cancelled or no assets returned');
+        }
+    };
+
+    const choosePhotoLibrary = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.cancelled && result.assets && result.assets.length > 0) {
+            setImage(result.assets[0].uri);
+        } else {
+            console.log('Library picking cancelled or no assets returned');
+        }
+    };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => bottomSheetRef.current.open()} style={styles.profileImageContainer}>
         <Image 
-          source={require('../../assets/profile-placeholder.png')}
+          source={image ? { uri: image } : require('../../assets/profile-placeholder.png')}
           style={styles.profileImage}
         />
         <Image
@@ -39,7 +67,7 @@ const ProfileHeader = ({ onToggleAvailability }) => {
       <View style={styles.toggleContainer}>
         <Text style={styles.toggleLabel}>Toggle Availability</Text>
         <Switch
-          trackColor={{ false: "#d3d3d3", true: "#34eb4f" }}
+          trackColor={{ false: "#ff0000", true: "#34eb4f" }}
           thumbColor={isAvailable ? "#ffffff" : "#ffffff"}
           ios_backgroundColor="#ff0000"
           onValueChange={toggleSwitch}
@@ -65,10 +93,10 @@ const ProfileHeader = ({ onToggleAvailability }) => {
       >
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Upload Photo</Text>
-          <TouchableOpacity style={styles.panelButton} onPress={takePhotoFromCamera}>
+          <TouchableOpacity style={styles.panelButton} onPress={takePhotoCamera}>
             <Text style={styles.panelButtonTitle}>Take Photo</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.panelButton} onPress={choosePhotoFromLibrary}>
+          <TouchableOpacity style={styles.panelButton} onPress={choosePhotoLibrary}>
             <Text style={styles.panelButtonTitle}>Choose From Library</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.panelButton} onPress={() => bottomSheetRef.current.close()}>
@@ -79,6 +107,7 @@ const ProfileHeader = ({ onToggleAvailability }) => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -131,7 +160,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   panelButtonTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
   }
