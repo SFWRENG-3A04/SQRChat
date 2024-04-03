@@ -2,3 +2,4 @@ Flask
 flask-cors
 Pillow
 firebase_admin
+flask_socketio
