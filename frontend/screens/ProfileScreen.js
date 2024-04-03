@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import ProfileHeader from '../components/profileComponents/profileHeader';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-export default function ProfileScreen({navigation}) {
+export default function ProfileScreen({ navigation }) {
+  const handleToggleAvailability = (available) => {
+    // Functionality to update availability status
+  };
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <View style={styles.container}>
-      <Text>Profile</Text>
+      <ProfileHeader 
+        onToggleAvailability={handleToggleAvailability} 
+      />
     </View>
+    </GestureHandlerRootView>
   );
 }
 
@@ -16,12 +25,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    width: '80%',
   },
 });
