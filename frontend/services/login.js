@@ -10,6 +10,7 @@ import { ref, set } from "firebase/database";
 const auth = getAuth();
 
 const logIn = async (email, password) => {
+  console.log("login: ", email, password)
   signInWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
     // Signed in 
