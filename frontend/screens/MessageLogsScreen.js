@@ -11,10 +11,10 @@ import {
   Platform,
 } from "react-native";
 import Messages from "../components/Messages";
-import Constants from "expo-constants";
 import { io } from "socket.io-client";
 import { db, ref, auth } from "../services/firebase";
 import { update } from "firebase/database";
+import { backendEndpoint } from "../common/constants";
 
 export default function MessageLogsScreen({ route }) {
   const { chatDetails, users } = route.params;
@@ -23,8 +23,6 @@ export default function MessageLogsScreen({ route }) {
   const [socketInstance, setSocketInstance] = useState(null);
   const [messages, setMessages] = useState(chatDetails.messages);
   const [messageText, setMessageText] = useState("");
-
-  const backendEndpoint = Constants.expoConfig.extra.backendEndpoint;
 
   const handleMessageSend = () => {
     if (messageText.trim()) {

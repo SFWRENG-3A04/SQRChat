@@ -9,16 +9,15 @@ import {
 } from "react-native";
 import UserCard from "../components/UserCard";
 import axios from "axios";
-import Constants from "expo-constants";
 import { auth } from "../services/firebase";
+import { backendEndpoint } from "../common/constants";
 
 export default function ManageUsersScreen({ route }) {
   const [users, setUsers] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  const backendEndpoint = Constants.expoConfig.extra.backendEndpoint;
 
   const fetchData = () => {
-    console.log("attempt to fetch user list")
+    console.log("attempt to fetch user list");
     axios
       .get(`http://${backendEndpoint}/get_user_list`)
       .then((response) => {
@@ -39,7 +38,7 @@ export default function ManageUsersScreen({ route }) {
   }, []);
 
   const handleUserDelete = (userId) => {
-    console.log("attempt to delete " + userId)
+    console.log("attempt to delete " + userId);
     axios
       .delete(`http://${backendEndpoint}/delete_user/${userId}`)
       .then(() => {

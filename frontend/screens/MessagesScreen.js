@@ -10,14 +10,13 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SelectMessageScreen from "./SelectMessageScreen";
 import MessageLogsScreen from "./MessageLogsScreen";
 import axios from "axios";
-import Constants from "expo-constants";
+import { backendEndpoint } from "../common/constants";
 
 const Stack = createNativeStackNavigator();
 
 export default function MessagesScreen({ route, navigation }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const backendEndpoint = Constants.expoConfig.extra.backendEndpoint;
 
   const LoadingScreen = () => {
     return (
