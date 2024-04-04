@@ -4,17 +4,30 @@ import { users } from "./data/fakeUsers";
 const getChats = (uid) => {
   // Combine group chats and direct messages into a single array
   const allChats = [...chats.groupChats, ...chats.directMessages];
-  
   // Filter the chats to find those that include the specified UID as a participant
   const userChats = allChats.filter(chat => chat.participants.includes(uid));
-  
+  return userChats;
+}
+
+const getdmChats = (uid) => {
+  // Combine group chats and direct messages into a single array
+  const dmChats =chats.directMessages;
+  // Filter the chats to find those that include the specified UID as a participant
+  const userChats = dmChats.filter(chat => chat.participants.includes(uid));
+  return userChats;
+}
+
+const getGroupChats = (uid) => {
+  // Combine group chats and direct messages into a single array
+  const groupChats =chats.groupChats;
+  // Filter the chats to find those that include the specified UID as a participant
+  const userChats = groupChats.filter(chat => chat.participants.includes(uid));
   return userChats;
 }
 
 const getUser = (uid) => {
   // Find the user by UID in the users array
   const user = users.find(user => user.uid === uid);
-
   // Check if a user was found
   if(user) {
     return user;
@@ -35,4 +48,4 @@ const sendMessage = (chatId, message) => {
   }
 };
 
-export { getChats, getUser, sendMessage };
+export { getChats, getdmChats,getGroupChats,getUser, sendMessage };

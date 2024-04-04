@@ -27,6 +27,7 @@ export default function MessageLogsScreen({ route }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === "ios" ? 135 : 0}
     >
+       <View style={styles.container}>
       <ScrollView style={styles.messageContainer}>
         <Messages messages={chatDetails.messages} currentUserUid={currentUserUid} />
       </ScrollView>
@@ -41,6 +42,7 @@ export default function MessageLogsScreen({ route }) {
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -49,9 +51,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-between',
+    height:200,
+    
   },
   messageContainer: {
     // might need flex here
+    
   },
   inputContainer: {
     flexDirection: 'row',

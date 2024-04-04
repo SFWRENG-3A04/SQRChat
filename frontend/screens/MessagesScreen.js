@@ -1,52 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import { Image, ScrollView } from 'react-native';
+import { StyleSheet, FlatList, Text, ImageBackground, View, Button, TextInput, TouchableOpacity } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SelectMessageScreen from './SelectMessageScreen';
 import MessageLogsScreen from './MessageLogsScreen';
+import Icon from '../assets/logo.png';
+import Background from '../assets/loginbackground.png';
 
 const Stack = createNativeStackNavigator();
 
-export default function MessagesScreen({route, navigation}) {
-  // const [groupChats, setGroupChats] = useState([])
-  // const [dms, setDms] = useState([])
-
-  // useEffect(() => {
-  //   setGroupChats([
-  //     { id: 1, name: "Group Chat 1" },
-  //     { id: 2, name: "Group Chat 2" },
-  //     { id: 3, name: "Group Chat 3" },
-  //   ]);
-  // }, []);
-
-  return (
-    <Stack.Navigator initialRouteName="SelectMessage">
-      <Stack.Screen name="SelectMessage" component={SelectMessageScreen} //initialParams={{ 'groupChats': groupChats, 'setGroupChats': setGroupChats, 'dms': dms, 'setDms': setDms}}
-        options={({ route, navigation }) => ({
-          title: 'Messages',
-          headerRight: () => (
-            <Button title="Forward" 
-              onPress={() => navigation.push('MessageLogs', { chatDetails: {id: "lol", name: "Forward button was hit"} })}
-            />
-          ),
-        })}
-      />
-      <Stack.Screen name="MessageLogs" component={MessageLogsScreen} />
-    </Stack.Navigator>
-  );
+export default function MessagesScreen({ route, navigation }) {
+ return (
+    <ImageBackground source={Background} style={styles.Background}>
+      <View style={styles.imageContainer}>
+        <Image source={Icon} style={styles.topImage} />
+      </View>
+     
+        <View style={styles.container}>
+          <View style={styles.listContainer}>
+            <Stack.Navigator initialRouteName="SelectMessage">
+              <Stack.Screen
+                name="Group Chats"
+                component={SelectMessageScreen}
+                options={{
+                 headerTitle: '', // This line removes the title
+                }}
+              />
+              <Stack.Screen name="MessageLogs" component={MessageLogsScreen} />
+            </Stack.Navigator>
+          </View>
+        </View>
+   
+    </ImageBackground>
+ );
 }
 
 const styles = StyleSheet.create({
-  container: {
+ container: {
     flex: 1,
-    backgroundColor: '#fff',
+    
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    width: '80%',
-  },
+    
+ },
+ imageContainer: {
+    width: '100%',
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+
+    
+ },
+ topImage: {
+    width: '25%',
+    height: '61%',
+ },
+
+ Background: {
+    width: '100%',
+    height: '100%',
+
+ },
+
+ listContainer:{
+
+
+
+    paddingBottom:20,
+
+    height:900,
+    width:'100%',
+    backgroundColor:'white',
+    
+ },
+
 });

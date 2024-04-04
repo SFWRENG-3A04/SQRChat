@@ -1,54 +1,130 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { getUser } from '../mock/functions';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { getChats, getUser, getdmChats, getGroupChats } from '../mock/functions'
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+
 
 const Chat = ({ groupChats, onChatSelected }) => {
-  // Function to get user names from their UIDs
-  const getUserNames = (participants) => {
-    return participants.map(uid => {
-      const user = getUser(uid);
-      return user ? user.displayName : 'Unknown';
-    }).join(', ');
-  };
+ const navigation = useNavigation(); // Use the useNavigation hook
 
-  return (
+ const getUserNames = (participants) => {
+  // Filter out the participant with ID 1
+  const filteredParticipants = participants.filter(uid => uid != 1);
+ 
+  return filteredParticipants.map(uid => {
+     const user = getUser(uid);
+     return user ? user.displayName : 'Unknown';
+  }).join(', ');
+ };
+
+ const getUserPhoto = (participants) => {
+  // Filter out the participant with ID 1
+  const filteredParticipants = participants.filter(uid => uid != 1);
+ 
+  return filteredParticipants.map(uid => {
+     const user = getUser(uid);
+     return user ? user.photoUrl : 'Unknown';
+  }).join(', ');
+ };
+
+ return (
     <View style={styles.listContainer}>
+     
       {groupChats.map(chat => (
+        
         <TouchableOpacity
+        
           key={chat.chatId}
           onPress={() => onChatSelected(chat)}
           style={styles.buttonStyle}
         >
-          <Text style={styles.chatNameStyle}>{chat.displayName || "Chat"}</Text>
-          <Text style={styles.participantsStyle}>
-            {getUserNames(chat.participants)}
-          </Text>
+          <View style={styles.chatItem}>
+          {chat.participants.length === 2 && (
+          <Image
+              style={styles.chatImageStyle} 
+              source={{uri:getUserPhoto(chat.participants)}}
+            />
+            )}
+             {chat.participants.length != 2 && (<Image
+              style={styles.chatImageStyle} 
+              source={{uri: chat.pictureURL}}
+            /> )} 
+                      {chat.participants.length === 2 && (
+            <Text style={styles.participantsStyle}>
+              {getUserNames(chat.participants)}
+            </Text>
+          )}
+            {chat.participants.length != 2 && (
+              <Text style={styles.chatNameStyle}>{chat.displayName || "Chat"}</Text>
+            )}
+          </View>
+
         </TouchableOpacity>
+        
       ))}
+
+
     </View>
-  );
+ );
 };
 
 const styles = StyleSheet.create({
   listContainer: {
-    marginTop: 20,
+    marginTop: 10,
+    width:300,
   },
+
+
+  chatImageStyle: {
+    width: 50, 
+    height: 50, 
+    borderRadius: 25,
+    marginRight: 10
+  },
+
   buttonStyle: {
-    backgroundColor: '#007bff',
+
     padding: 10,
     marginVertical: 5,
     borderRadius: 5,
-    alignItems: 'center',
+    width:'90%',
+    marginLeft:'3%',
   },
   chatNameStyle: {
-    color: '#ffffff',
+    color: '#4D4D4D',
     fontSize: 18,
     fontWeight: 'bold',
   },
-  participantsStyle: {
-    color: '#dddddd',
-    fontSize: 14,
+
+  chatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    
   },
+  chatImageStyle: {
+    width: 50, 
+    height: 50, 
+    borderRadius: 25,
+    marginRight: 10
+  },
+  participantsStyle: {
+    color: '#4D4D4D',
+    fontSize: 18,
+    fontWeight: 'bold',
+    
+   
+  },
+  backButtonStyle: {
+    // Style for the back button container
+    marginTop:100,
+    padding: 10,
+    alignSelf: 'flex-start', // Align to the left
+ },
+ backButtonTextStyle: {
+    // Style for the back button text
+    fontSize: 18,
+    color: 'blue',
+ },
 });
 
 export default Chat;

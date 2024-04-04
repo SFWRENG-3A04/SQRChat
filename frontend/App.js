@@ -3,13 +3,15 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { TouchableOpacity, View, Button } from 'react-native';
 import { logOut } from './services/login';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 
 import LandingScreen from './screens/LandingScreen'; // Your login screen
 import MessagesScreen from './screens/MessagesScreen';
-import ScanningScreen from './screens/ScanningScreen';
+import ChatScreen from './screens/ChatScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import { useNavigation } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 
@@ -25,24 +27,24 @@ export default function App() {
           <Tab.Screen
             name="Messages"
             component={MessagesScreen}
-            options={{ title: 'Messages Title' }}
+            options={{ title: 'Select Messages' }}
           />
           <Tab.Screen
-            name="Scanning"
-            component={ScanningScreen}
-            options={{ title: 'Scanning' }}
+          
+            name="Chats"
+            component={ChatScreen}
+            options={({ navigation }) => ({
+              title: 'Chats',
+            
+           })}
           />
-          <Tab.Screen
-            name="Settings"
-            component={SettingsScreen}
-            options={{ title: 'Settings Title' }}
-          />
+   
           <Tab.Screen
             name="Profile" 
             component={ProfileScreen}
             options={{
               title: 'Profile Title',
-              tabBarLabel: 'Profile b',
+              tabBarLabel: 'Profile',
               headerRight: () => (
                 <View style={{marginRight:8,zIndex:2}}>
                     <Button title="Logout" onPress={logOut}/>
