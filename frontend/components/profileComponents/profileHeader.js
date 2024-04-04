@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { View, Image, Switch, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import * as ImagePicker from 'expo-image-picker';
+import { Camera, CameraType } from 'expo-camera';
 
 const ProfileHeader = ({ onToggleAvailability }) => {
   const [isAvailable, setIsAvailable] = useState(false);
