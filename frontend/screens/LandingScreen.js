@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
-import { ref, get, set, onValue } from "firebase/database";
+import { ref, set, onValue } from "firebase/database";
 import Login from "../components/Login";
-import { app, db, getAuth } from "../services/firebase";
-import { logIn, logOut, signUp } from "../services/login";
+import { db, getAuth } from "../services/firebase";
+import { logIn, signUp } from "../services/login";
 
 export default function LandingScreen({ setLoggedIn, setIsAdmin }) {
   const [user, setUser] = useState(null);
