@@ -1,19 +1,20 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { getUser } from '../mock/functions';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-const Chat = ({ groupChats, onChatSelected }) => {
+const Chat = ({ groupChats, onChatSelected, users }) => {
   // Function to get user names from their UIDs
   const getUserNames = (participants) => {
-    return participants.map(uid => {
-      const user = getUser(uid);
-      return user ? user.displayName : 'Unknown';
-    }).join(', ');
+    return participants
+      .map((uid) => {
+        const user = users.find((user) => user.uid === uid);
+        return user && user.displayName ? user.displayName : "Unknown";
+      })
+      .join(", ");
   };
 
   return (
     <View style={styles.listContainer}>
-      {groupChats.map(chat => (
+      {groupChats.map((chat) => (
         <TouchableOpacity
           key={chat.chatId}
           onPress={() => onChatSelected(chat)}
@@ -34,19 +35,19 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   buttonStyle: {
-    backgroundColor: '#007bff',
+    backgroundColor: "#007bff",
     padding: 10,
     marginVertical: 5,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
   chatNameStyle: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   participantsStyle: {
-    color: '#dddddd',
+    color: "#dddddd",
     fontSize: 14,
   },
 });
