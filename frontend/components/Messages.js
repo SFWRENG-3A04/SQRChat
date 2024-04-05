@@ -6,7 +6,7 @@ import {
   TouchableWithoutFeedback,
   Animated,
   Dimensions,
-  Modal
+  Modal,
 } from 'react-native';
 import Reactions from './Reactions';
 
@@ -15,11 +15,13 @@ export default function Messages({ messages, currentUserUid, users }) {
   const [reactionPos, setReactionPos] = useState({ x: 0, y: 0 });
   const [selectedMessageIndex, setSelectedMessageIndex] = useState(null);
   const messageRefs = useRef({}).current;
+  const scaleAnimations = useRef(messages.map(() => new Animated.Value(1))).current;
 
   useEffect(() => {
-    // Reset refs when messages change
+    // Reset refs and animations when messages change
     messages.forEach((_, index) => {
       messageRefs[index] = messageRefs[index] || React.createRef();
+      scaleAnimations[index] = scaleAnimations[index] || new Animated.Value(1);
     });
   }, [messages]);
 
@@ -28,19 +30,33 @@ export default function Messages({ messages, currentUserUid, users }) {
     return user ? user.displayName : 'Unknown';
   };
 
+  const animateBubble = (index, toValue) => {
+    Animated.timing(scaleAnimations[index], {
+      toValue,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+  };
+
   const handleLongPress = (index) => {
     setSelectedMessageIndex(index);
+    animateBubble(index, 1.1); // Slightly enlarges the bubble
     messageRefs[index].current.measure((fx, fy, width, height, px, py) => {
       const isCurrentUser = messages[index].senderUid === currentUserUid;
-      // Adjusting xPosition based on the sender
-      const xPosition = isCurrentUser ? Dimensions.get('window').width - 300 : 10; // Adjust as needed
+      const xPosition = isCurrentUser ? Dimensions.get('window').width - 300 : 10;
       setReactionPos({
         x: xPosition,
-        y: py-50, // Positioned above the message bubble
+        y: py - 50,
       });
       setIsReactionsVisible(true);
     });
   };
+
+  useEffect(() => {
+    if (!isReactionsVisible && selectedMessageIndex !== null) {
+      animateBubble(selectedMessageIndex, 1); // Reset to original size when modal is hidden
+    }
+  }, [isReactionsVisible]);
 
   const handleSelectReaction = (reaction) => {
     console.log(`Selected reaction ${reaction} for message index ${selectedMessageIndex}`);
@@ -58,44 +74,46 @@ export default function Messages({ messages, currentUserUid, users }) {
 
   return (
     <View>
-    {messages.map((message, index) => (
-      <TouchableWithoutFeedback
-        key={index}
-        onLongPress={() => handleLongPress(index)}
-      >
-        <View ref={messageRefs[index]} style={styles.messageContainer}>
-          <Animated.View
-            style={[
-              styles.messageBubble,
-              message.senderUid === currentUserUid ? styles.rightBubble : styles.leftBubble,
-            ]}>
-            <Text style={styles.senderName}>{getSenderName(message.senderUid)}</Text>
-            <Text style={styles.messageText}>{message.text}</Text>
-          </Animated.View>
-        </View>
-      </TouchableWithoutFeedback>
-    ))}
-    <Modal
-      transparent={true}
-      visible={isReactionsVisible}
-      animationType="none"
-      onRequestClose={dismissReactions}
-    >
-      <TouchableWithoutFeedback onPress={dismissReactions}>
-        <View style={styles.fullScreenOverlay}>
-          <View style={[styles.reactionsContainer, { top: reactionPos.y, left: reactionPos.x }]}>
-            <Reactions onSelect={handleSelectReaction} onUnsend={handleUnsend} />
+      {messages.map((message, index) => (
+        <TouchableWithoutFeedback
+          key={index}
+          onLongPress={() => handleLongPress(index)}
+        >
+          <View ref={messageRefs[index]} style={styles.messageContainer}>
+            <Animated.View
+              style={[
+                styles.messageBubble,
+                { transform: [{ scale: scaleAnimations[index] }] },
+                message.senderUid === currentUserUid ? styles.rightBubble : styles.leftBubble,
+              ]}
+            >
+              <Text style={styles.senderName}>{getSenderName(message.senderUid)}</Text>
+              <Text style={styles.messageText}>{message.text}</Text>
+            </Animated.View>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
-  </View>
+        </TouchableWithoutFeedback>
+      ))}
+      <Modal
+        transparent={true}
+        visible={isReactionsVisible}
+        animationType="none"
+        onRequestClose={dismissReactions}
+      >
+        <TouchableWithoutFeedback onPress={dismissReactions}>
+          <View style={styles.fullScreenOverlay}>
+            <View style={[styles.reactionsContainer, { top: reactionPos.y, left: reactionPos.x }]}>
+              <Reactions onSelect={handleSelectReaction} onUnsend={handleUnsend} />
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   messageContainer: {
-    padding: 0, // Ensures there's space for the ref to correctly position
+    padding: 0,
   },
   messageBubble: {
     padding: 10,
@@ -120,11 +138,6 @@ const styles = StyleSheet.create({
   messageText: {
     color: 'black',
   },
-  modalOverlay: {
-    position: 'absolute',
-    // Adjustments may be needed based on modal content size
-    // This is an initial position, it will be overwritten by state
-  },
   fullScreenOverlay: {
     position: 'absolute',
     width: '100%',
@@ -132,6 +145,5 @@ const styles = StyleSheet.create({
   },
   reactionsContainer: {
     position: 'absolute',
-    // Other styling as needed for the Reactions component itself
   },
 });
