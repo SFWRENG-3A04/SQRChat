@@ -1,17 +1,13 @@
 import React, { useState, useRef } from "react";
-import {StyleSheet, View,Text,TextInput,Button} from "react-native";
-import { ScrollView, Keyboard } from 'react-native';
-import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import {StyleSheet, View, Text, TextInput, Button, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, ScrollView} from "react-native";
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { auth } from '../../services/firebase'
 
-const auth = getAuth();
-
-const user = auth.currentUser;
-const emailName = user.email; //Parsing user email 
-const username = emailName.split('@')[0]; //Parsing the beginning of the email to act as a username
-
-const profileAuth = () => {
+const profileAuth = ({user}) => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [username, setUsername] = useState(user.displayName)
+  const [email, setEmail] = useState(user.email)
 
   const scrollViewRef = useRef(null);
   
@@ -37,46 +33,50 @@ const profileAuth = () => {
       contentContainerStyle={styles.scrollViewContent}
       keyboardShouldPersistTaps="handled"
       >
-      <View style={styles.container}>
-        <Text style={styles.label}>Username</Text>
-        <View style={styles.section}>
-          <Text style={styles.value}>{username}</Text>
-        </View>
-        <Text style={styles.label}>Email</Text>
-        <View style={styles.section}>
-          <Text style={styles.value}>{emailName}</Text>
-        </View>
-        <Text style={styles.label}>Change Password</Text> 
-        <View style={[styles.section, styles.changePasswordBox]}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Current Password</Text> 
-            <TextInput
-              style={styles.input}
-              secureTextEntry
-              value={currentPassword}
-              onChangeText={(text) => setCurrentPassword(text)}
-            />
-            <Text style={styles.label}>New Password</Text>
-            <TextInput
-              style={styles.input}
-              secureTextEntry
-              value={newPassword}
-              onChangeText={(text) => setNewPassword(text)}
-            />
+      <KeyboardAvoidingView behavior="height" style={{flex: 1}}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View>
+            <Text style={styles.label}>Username</Text>
+            <View style={styles.section}>
+              <Text style={styles.value}>{username}</Text>
+            </View>
+            <Text style={styles.label}>Email</Text>
+            <View style={styles.section}>
+              <Text style={styles.value}>{email}</Text>
+            </View>
+            <Text style={styles.label}>Change Password</Text> 
+            <View style={[styles.section, styles.changePasswordBox]}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Current Password</Text> 
+                <TextInput
+                  style={styles.input}
+                  secureTextEntry
+                  value={currentPassword}
+                  onChangeText={(text) => setCurrentPassword(text)}
+                />
+                <Text style={styles.label}>New Password</Text>
+                <TextInput
+                  style={styles.input}
+                  secureTextEntry
+                  value={newPassword}
+                  onChangeText={(text) => setNewPassword(text)}
+                />
+              </View>
+              <View style={styles.buttonContainer}>
+                <Button
+                  title="Update"
+                  color="#4B8DF7"
+                  onPress={() => {
+                    handleChangePassword(newPassword);
+                    Keyboard.dismiss(); // Dismiss keyboard after pressing "Update"
+                  }
+                }
+                />
+              </View>
+            </View>
           </View>
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Update"
-              color="#4B8DF7"
-              onPress={() => {
-                handleChangePassword(newPassword);
-                Keyboard.dismiss(); // Dismiss keyboard after pressing "Update"
-              }
-            }
-            />
-          </View>
-        </View>
-      </View>
+          </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </ScrollView>
   );
 };

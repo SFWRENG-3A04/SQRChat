@@ -18,12 +18,13 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState(undefined);
 
   return (
     <GestureHandlerRootView>
       <NavigationContainer>
         {!loggedIn ? (
-          <LandingScreen setLoggedIn={setLoggedIn} setIsAdmin={setIsAdmin} />
+          <LandingScreen setLoggedIn={setLoggedIn} setIsAdmin={setIsAdmin} user={user} setUser={setUser} />
         ) : (
           <Tab.Navigator 
             initialRouteName="Messages"
@@ -76,7 +77,7 @@ export default function App() {
             /> */}
             <Tab.Screen
               name="Profile"
-              component={ProfileScreen}
+              children={() => (<ProfileScreen user={user} />)}
               options={{
                 title: "Profile Title",
                 tabBarLabel: "Profile",

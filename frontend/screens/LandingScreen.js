@@ -6,8 +6,7 @@ import Login from "../components/Login";
 import { db, getAuth } from "../services/firebase";
 import { logIn, signUp } from "../services/login";
 
-export default function LandingScreen({ setLoggedIn, setIsAdmin }) {
-  const [user, setUser] = useState(null);
+export default function LandingScreen({ setLoggedIn, setIsAdmin, user, setUser }) {
   const [uid, setUID] = useState(null);
   const auth = getAuth();
 

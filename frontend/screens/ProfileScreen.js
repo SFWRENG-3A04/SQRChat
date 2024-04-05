@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import ProfileHeader from '../components/profileComponents/profileHeader';
 import ProfileAuth from '../components/profileComponents/profileAuth';
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen({ navigation, user }) {
   // Handler function when toggling availability
   const onToggleAvailability = (isAvailable) => {
     console.log(isAvailable ? 'Available' : 'Not available');
@@ -12,7 +12,7 @@ export default function ProfileScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <ProfileHeader onToggleAvailability={onToggleAvailability} />
-      <ProfileAuth/>
+      <ProfileAuth user={user}/>
     </View>
   );
 }
