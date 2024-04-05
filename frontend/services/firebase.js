@@ -11,12 +11,12 @@ import { getDatabase, ref, set } from "firebase/database";
 // instead we will just store email and password
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCTNx0cnXkVMjHmIcCBqPnGdAKd5UooaDM",
-  authDomain: "sqrchat-e7443.firebaseapp.com",
-  projectId: "sqrchat-e7443",
-  storageBucket: "sqrchat-e7443.appspot.com",
-  messagingSenderId: "837380904816",
-  appId: "1:837380904816:web:896c896216a33c158b61b5"
+  apiKey: process.env.EXPO_PUBLIC_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_APP_ID
 };
 
 // initialize Firebase App

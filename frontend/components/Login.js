@@ -3,6 +3,8 @@ import { StyleSheet, View, TextInput, Button, KeyboardAvoidingView, TouchableWit
 
 
 export default function Login({ user, uid, db, logIn, signUp }) {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -13,6 +15,20 @@ export default function Login({ user, uid, db, logIn, signUp }) {
       <KeyboardAvoidingView behavior="height" style={{flex: 1}}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View style={styles.container}>
+            <TextInput
+              style={styles.input}
+              onChangeText={setFirstName}
+              value={firstName}
+              placeholder="First Name"
+              keyboardType="default"
+            />
+            <TextInput
+              style={styles.input}
+              onChangeText={setLastName}
+              value={lastName}
+              placeholder="Last Name"
+              keyboardType="default"
+            />
             <TextInput
               style={styles.input}
               onChangeText={setEmail}
@@ -27,7 +43,7 @@ export default function Login({ user, uid, db, logIn, signUp }) {
               placeholder="Password"
               secureTextEntry={true} // This will obscure the text for password input
             />
-            <Button title={'Create Account'} onPress={() => signUp(email, password)} />
+            <Button title={'Create Account'} onPress={() => signUp(email, password, `${firstName}${lastName ? ` ${lastName}` : ''}`)} />
             <Button title={'Login'} onPress={() => logIn(email, password)} />
           </View>
         </TouchableWithoutFeedback>

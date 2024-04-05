@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
   signOut,
 } from "firebase/auth";
 import { getAuth, db } from "../services/firebase";
@@ -33,22 +34,26 @@ const addUserToDb = async (uid, displayName) => {
   });
 }
 
-const signUp = async (email, password) => {
-  console.log(email, password)
+const signUp = async (email, password, displayName) => {
+  console.log(email, password);
   createUserWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-    // Signed up 
-    const user = userCredential.user;
-    // ...
-    addUserToDb(user.uid, user.displayName)
-    
-    console.log("signUp", user)
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log(errorCode, errorMessage);
-  });
+    .then((userCredential) => {
+      // Signed up 
+      const user = userCredential.user;
+      updateProfile(user, {
+        displayName: displayName
+      }).then(() => {
+        addUserToDb(user.uid, user.displayName);
+        console.log("signUp", user);
+      }).catch((error) => {
+        console.log("Error updating user profile:", error);
+      });
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+    });
 };
 
 const logOut = async (e) => {

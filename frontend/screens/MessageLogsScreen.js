@@ -11,26 +11,41 @@ import {
   Platform,
 } from "react-native";
 import Messages from "../components/Messages";
-import Constants from "expo-constants";
 import { io } from "socket.io-client";
+import { db, ref, auth } from "../services/firebase";
+import { update } from "firebase/database";
+import { backendEndpoint } from "../common/constants";
 
 export default function MessageLogsScreen({ route }) {
-  const { chatDetails } = route.params;
-  const currentUserUid = "1";
+  const { chatDetails, users } = route.params;
+  const currentUserUid = auth.currentUser.uid;
+
   const [socketInstance, setSocketInstance] = useState(null);
   const [messages, setMessages] = useState(chatDetails.messages);
   const [messageText, setMessageText] = useState("");
-  const backendEndpoint = Constants.expoConfig.extra.backendEndpoint;
 
   const handleMessageSend = () => {
     if (messageText.trim()) {
-      const newMessage = {
-        senderUid: "1", // Assuming "1" is the UID of the current user
+      const socketMessage = {
+        senderUid: currentUserUid,
         text: messageText.trim(),
         chatId: chatDetails.chatId,
       };
 
-      socketInstance.emit("sendMessage", newMessage);
+      socketInstance.emit("sendMessage", socketMessage);
+
+      const newMessage = {
+        senderUid: currentUserUid,
+        text: messageText.trim(),
+      };
+
+      const updatedChat = {
+        ...chatDetails,
+        messages: [...chatDetails.messages, newMessage],
+        lastUpdated: Date.now(), // Update lastUpdated timestamp
+      };
+
+      update(ref(db, `chats/${chatDetails.chatId}`), updatedChat);
       setMessageText("");
     }
   };
@@ -66,7 +81,11 @@ export default function MessageLogsScreen({ route }) {
       keyboardVerticalOffset={Platform.OS === "ios" ? 135 : 0}
     >
       <ScrollView style={styles.messageContainer}>
-        <Messages messages={messages} currentUserUid={currentUserUid} />
+        <Messages
+          users={users}
+          messages={messages}
+          currentUserUid={currentUserUid}
+        />
       </ScrollView>
       <View style={styles.inputContainer}>
         <TextInput
