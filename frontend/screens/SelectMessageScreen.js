@@ -6,6 +6,7 @@ import { getChats, getUser, getdmChats, getGroupChats } from '../mock/functions'
 import Icon from'../assets/logo.png';
 import Background from '../assets/loginbackground.png';
 
+
 export default function SelectMessageScreen({ navigation }) {
  const [groupChats, setGroupChats] = useState([]);
  const [dms, setDms] = useState([]);
@@ -33,7 +34,11 @@ export default function SelectMessageScreen({ navigation }) {
 
  return (
     <ImageBackground source={Background} style={styles.Background}>
+       <View style={styles.banner}>
+      <Image source={Icon} style={styles.Icon}/>
+         </View>
       <View style={styles.container}>
+     
         
       <TouchableOpacity style={styles.titlecontainer} onPress={toggleGroupChatsVisibility}>
  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
@@ -51,8 +56,16 @@ export default function SelectMessageScreen({ navigation }) {
         {groupChatsVisible && (
           <ScrollView style={styles.chatcontainer}>
             <Chat groupChats={groupChats} onChatSelected={handleChatSelected} />
+            <View style={styles.NewChatBox}>
+            <Text style={styles.NewChat} onChatSelected={handleChatSelected}>+ Add New</Text>
+            </View>
           </ScrollView>
+      
+         
+                            
         )}
+
+
 
 <TouchableOpacity style={styles.titlecontainer} onPress={toggleDmsVisibility}>
  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
@@ -70,6 +83,9 @@ export default function SelectMessageScreen({ navigation }) {
         {dmsVisible && (
           <ScrollView style={styles.chatcontainer}>
             <Chat groupChats={dms} onChatSelected={handleChatSelected} />
+            <View style={styles.NewChatBox}>
+            <Text style={styles.NewChat} onChatSelected={handleChatSelected}>+ Add New</Text>
+            </View>
           </ScrollView>
         )}
       </View>
@@ -115,4 +131,29 @@ marginRight:'10%',
     fontSize:25,
     color:"#6FBAFF"
  },
+ banner:{
+   backgroundColor:'white',
+   alignItems: 'center', // This will center the Image horizontally
+   justifyContent: 'center', // This will center the Image vertically
+   shadowColor: '#000',
+   shadowOffset: { width: 0, height: 2 },
+   shadowOpacity: 0.9,
+   shadowRadius: 3.84,
+   elevation: 5,
+ },
+ Icon:{
+   width:145,
+   height:100,
+   zIndex:999,
+ },
+ NewChat:{
+   color:'white',
+   fontSize:25,
+  
+ },
+ NewChatBox:{
+   backgroundColor:'#C3E2FF',
+   alignItems: 'center', // This will center the Image horizontally
+   justifyContent: 'center', // This will center the Image vertically
+ }
 });

@@ -27,14 +27,17 @@ export default function App() {
           <Tab.Screen
             name="Messages"
             component={MessagesScreen}
-            options={{ title: 'Select Messages' }}
+            options={{ title: '',
+            tabBarLabel: 'Messages', }}
           />
           <Tab.Screen
           
             name="Chats"
             component={ChatScreen}
             options={({ navigation }) => ({
-              title: 'Chats',
+              title: '',
+              tabBarLabel: 'Chat',
+              
             
            })}
           />

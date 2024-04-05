@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import Messages from '../components/Messages';
-import { sendMessage,getUser } from '../mock/functions';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { sendMessage ,getUser} from '../mock/functions';
+import { useNavigation} from '@react-navigation/native'; // Import useNavigation
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Send from '../assets/Send.png';
+import { AutoFocus } from 'expo-camera';
 
 export default function ChatScreen({route}) {
   const navigation = useNavigation(); // Get the navigation object
@@ -24,12 +26,22 @@ export default function ChatScreen({route}) {
   const getParticipantNames = (participants) => {
     // Filter out the participant with ID 1
     const filteredParticipants = participants.filter(uid => uid != 1);
-   
+
     return filteredParticipants.map(uid => {
-       const user = getUser(uid);
-       return user ? user.displayName : 'Unknown';
+        const user = getUser(uid); // Assuming getUser is a function that fetches user details
+        return user ? user.displayName : 'Unknown';
     }).join(', ');
-   };
+};
+
+const getUserPhoto = (participants) => {
+  // Filter out the participant with ID 1
+  const filteredParticipants = participants.filter(uid => uid != 1);
+ 
+  return filteredParticipants.map(uid => {
+     const user = getUser(uid);
+     return user ? user.photoUrl : 'Unknown';
+  }).join(', ');
+ };
   const handleMessageSend = () => {
       if (messageText.trim()) {
           const newMessage = {
@@ -56,9 +68,20 @@ export default function ChatScreen({route}) {
                   >
                       <Icon name="chevron-left" size={26} color="black" />
                   </TouchableOpacity>
+                  {chatDetails.participants.length === 2 && (<Image
+              style={styles.chatImageStyle} 
+              source={{uri: getUserPhoto(chatDetails.participants)}}
+            /> )} 
+
+{chatDetails.participants.length != 2 && (<Image
+              style={styles.chatImageStyle} 
+              source={{uri: chatDetails.pictureURL}}
+            /> )} 
                   {chatDetails.participants.length === 2 ? (
+                        
                       <Text style={styles.participantsStyle}>{getParticipantNames(chatDetails.participants)}</Text>
                   ) : (
+                    
                       <Text style={styles.chatNameStyle}>{chatDetails.displayName || "Chat Name"}</Text>
                   )}
               </View>
@@ -73,13 +96,14 @@ export default function ChatScreen({route}) {
                       style={styles.input}
                   />
                   <TouchableOpacity onPress={handleMessageSend} style={styles.sendButton}>
-                      <Text style={styles.sendButtonText}>Send</Text>
+                  <Image source={Send} style={styles.Send}/>
                   </TouchableOpacity>
               </View>
           </View>
       </KeyboardAvoidingView>
   );
 }
+
 
   const styles = StyleSheet.create({
     container: {
@@ -102,8 +126,8 @@ export default function ChatScreen({route}) {
     input: {
       flex: 1,
       marginRight: 10,
-      borderWidth: 1,
-      borderColor: '#ccc',
+      borderWidth: 3,
+      borderColor: '#6FBAFF',
       borderRadius: 20,
       padding: 10,
       fontSize: 16,
@@ -111,9 +135,7 @@ export default function ChatScreen({route}) {
     },
     sendButton: {
       justifyContent: 'center',
-      padding: 10,
-      backgroundColor: '#007bff',
-      borderRadius: 20,
+
     },
     sendButtonText: {
       color: '#ffffff',
@@ -128,12 +150,14 @@ export default function ChatScreen({route}) {
     fontSize: 18,
     color: 'black',
  },
+
  headerContainer: {
   flexDirection: 'row',
   alignItems: 'center',
   padding: 10,
   borderBottomWidth: 1,
   borderColor: '#ccc',
+  backgroundColor:'white',
 },
 chatNameStyle: {
   fontSize: 18,
@@ -143,6 +167,17 @@ chatNameStyle: {
 participantsStyle: {
   fontSize: 18,
   fontWeight: 'bold',
-  marginLeft: 10, // Add some space between the back button and the chat name
+  marginLeft: 10, // Add some space between the back button and the participants' names
 },
+chatImageStyle: {
+  width: 50, 
+  height: 50, 
+  borderRadius: 25,
+  marginRight: 10
+},
+Send:{
+  width:45,
+  height:45,
+
+}
   });

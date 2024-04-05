@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { getChats, getUser, getdmChats, getGroupChats } from '../mock/functions'
+import { getUser } from '../mock/functions';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
-
 
 const Chat = ({ groupChats, onChatSelected }) => {
  const navigation = useNavigation(); // Use the useNavigation hook
@@ -70,7 +69,7 @@ const Chat = ({ groupChats, onChatSelected }) => {
 
 const styles = StyleSheet.create({
   listContainer: {
-    marginTop: 10,
+    marginTop: 0,
     width:300,
   },
 
@@ -85,7 +84,9 @@ const styles = StyleSheet.create({
   buttonStyle: {
 
     padding: 10,
-    marginVertical: 5,
+
+
+    
     borderRadius: 5,
     width:'90%',
     marginLeft:'3%',
