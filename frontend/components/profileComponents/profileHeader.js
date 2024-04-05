@@ -1,78 +1,136 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Image, Switch, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Alert, View, Image, Switch, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera, CameraType } from 'expo-camera';
 
-const ProfileHeader = ({ onToggleAvailability }) => {
+const ProfileHeader = ({ toggleAvailability }) => {
   const [isAvailable, setIsAvailable] = useState(false);
   const [image, setImage] = useState(null);
-  const bottomSheetRef = useRef(null);
+  const [tempImage, setTempImage] = useState(null);
+  const uploadBottomSheetRef = useRef(null);
+  const saveBottomSheetRef = useRef(null);
+
   const [cameraStatus, requestCameraPermissions] = ImagePicker.useCameraPermissions();
   const [mediaStatus, requestMediaPermissions] = ImagePicker.useMediaLibraryPermissions();
 
-  const permisionFunction = async () => {
-    if (cameraStatus.status !== 'granted') {
-      const cameraPermission = await requestCameraPermissions();
-      if (cameraPermission.status !== 'granted') {
-        alert('Sorry, we need camera permissions to make this work!');
-        return;
-      }
-    }
-
-    if (mediaStatus.status !== 'granted') {
-      const mediaPermission = await requestMediaPermissions();
-      if (mediaPermission.status !== 'granted') {
-        alert('Sorry, we need mediallibrary permissions to make this work!');
-        return;
-      }
-    }
-  };
-
-  // useEffect(() => {
-  //   permisionFunction();
-  // }, []);
-
   const toggleSwitch = () => {
     setIsAvailable(prevState => !prevState);
-    onToggleAvailability && onToggleAvailability(!isAvailable);
+    toggleAvailability && toggleAvailability(!isAvailable);
   };
 
-    const takePhotoCamera = async () => {
-        permisionFunction();
-        const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
+  const checkCameraPermissions = async () => {
+    if (cameraStatus.status !== 'granted') {
+      const { status } = await requestCameraPermissions();
+      return status === 'granted';
+    }
+    return true;
+  };
 
-        if (!result.cancelled && result.assets && result.assets.length > 0) {
-            setImage(result.assets[0].uri);
-        } else {
-            console.log('Camera picking cancelled or no assets returned');
+  const checkMediaPermissions = async () => {
+    if (mediaStatus.status !== 'granted') {
+      const { status } = await requestMediaPermissions();
+      return status === 'granted';
+    }
+    return true;
+  };
+
+  const takePhotoCamera = async () => {
+	  const hasCameraPermission = await checkCameraPermissions();
+    if (!hasCameraPermission) {
+        Alert.alert(
+            'Permission Required',
+            'Camera access is needed to take photos. Please enable camera access in the settings.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Settings',
+                    onPress: () => Linking.openSettings(),
+                },
+            ],
+        );
+        return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.cancelled && result.assets && result.assets.length > 0) {
+      setTempImage(result.assets[0].uri);
+      uploadBottomSheetRef.current.close();
+      setTimeout(() => {
+        saveBottomSheetRef.current.open();
+      }, 200);
+    } else {
+      console.log('Camera picking cancelled or no assets returned');
+    }
+  };
+
+  const choosePhotoLibrary = async () => {
+	  const hasMediaPermission = await checkMediaPermissions();
+    if (!hasMediaPermission) {
+        Alert.alert(
+            'Permission Required',
+            'Media library access is needed to choose photos. Please enable media access in the settings.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Settings',
+                    onPress: () => Linking.openSettings(),
+                },
+            ],
+        );
+        return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.cancelled && result.assets && result.assets.length > 0) {
+      setTempImage(result.assets[0].uri);
+      uploadBottomSheetRef.current.close();
+      setTimeout(() => {
+        saveBottomSheetRef.current.open();
+      }, 300);
+    } else {
+      console.log('Library picking cancelled or no assets returned');
+    }
+  };
+
+  const saveProfilePicture = () => {
+    setImage(tempImage);
+    setTempImage(null);
+    saveBottomSheetRef.current.close();
+  };
+
+  const showConfirmationDialog = () => {
+    Alert.alert(
+      "Discard changes?",
+      "If you go back now, you will lose your changes.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "Discard", onPress: () => {
+            setImage(null);
+            setTempImage(null);
+            saveBottomSheetRef.current.close();
+          }
         }
-    };
-
-    const choosePhotoLibrary = async () => {
-        permisionFunction();
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-
-        if (!result.cancelled && result.assets && result.assets.length > 0) {
-            setImage(result.assets[0].uri);
-        } else {
-            console.log('Library picking cancelled or no assets returned');
-        }
-    };
+      ]
+    );
+  };
+  
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => bottomSheetRef.current.open()} style={styles.profileImageContainer}>
+      <TouchableOpacity onPress={() => uploadBottomSheetRef.current.open()} style={styles.profileImageContainer}>
         <Image 
           source={image ? { uri: image } : require('../../assets/profile-placeholder.png')}
           style={styles.profileImage}
@@ -93,7 +151,7 @@ const ProfileHeader = ({ onToggleAvailability }) => {
         />
       </View>
       <RBSheet
-        ref={bottomSheetRef}
+        ref={uploadBottomSheetRef}
         draggable={true}
         closeOnPressMask={false}
         height={300}
@@ -117,15 +175,44 @@ const ProfileHeader = ({ onToggleAvailability }) => {
           <TouchableOpacity style={styles.panelButton} onPress={choosePhotoLibrary}>
             <Text style={styles.panelButtonTitle}>Choose From Library</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.panelButton} onPress={() => bottomSheetRef.current.close()}>
+          <TouchableOpacity style={styles.panelButton} onPress={() => uploadBottomSheetRef.current.close()}>
             <Text style={styles.panelButtonTitle}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </RBSheet>
+      <RBSheet 
+        ref={saveBottomSheetRef} 
+        draggable={true} 
+        closeOnPressMask={true} 
+        height={700} 
+        openDuration={250} 
+        customStyles={{ 
+          container: { 
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20, 
+            alignItems: 'center', 
+          }, 
+          draggableIcon: { 
+            backgroundColor: '#d3d3d3', 
+            }, 
+          }} 
+      >
+        <View style={styles.panel}>
+          <Text style={styles.panelTitle}>Profile Picture</Text>
+          <View style={styles.centeredImageView}>
+            <Image source={{ uri: tempImage }} style={{ width: 200, height: 200, borderRadius: 100, marginTop: 120, marginBottom: 145 }} />
+          </View>
+          <TouchableOpacity style={styles.panelButton} onPress={saveProfilePicture}>
+            <Text style={styles.panelButtonTitle}>Save Profile Picture</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.panelButton} onPress={showConfirmationDialog}>
+            <Text style={styles.panelButtonTitle}>Close</Text>
           </TouchableOpacity>
         </View>
       </RBSheet>
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -181,7 +268,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
-  }
+  },
 });
 
 export default ProfileHeader;

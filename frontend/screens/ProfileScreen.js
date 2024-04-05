@@ -4,13 +4,13 @@ import ProfileHeader from '../components/profileComponents/profileHeader';
 
 export default function ProfileScreen({ navigation }) {
   // Handler function when toggling availability
-  const onToggleAvailability = (isAvailable) => {
+  const toggleAvailability = (isAvailable) => {
     console.log(isAvailable ? 'Available' : 'Not available');
   };
 
   return (
     <View style={styles.container}>
-      <ProfileHeader onToggleAvailability={onToggleAvailability} />
+      <ProfileHeader toggleAvailability={toggleAvailability} />
     </View>
   );
 }
