@@ -1,5 +1,12 @@
 import React, { useState } from "react";
 import {TouchableOpacity,StyleSheet, View,Text,TextInput,Button,} from "react-native";
+import { getAuth, updatePassword } from "firebase/auth";
+
+const auth = getAuth();
+
+const user = auth.currentUser;
+const emailName = user.email;
+const username = emailName.split('@')[0];
 
 const profileAuth = () => {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -12,15 +19,28 @@ const profileAuth = () => {
     // Implement save action
   };
 
+  const handleChangePassword = async () => {
+    if (user) {
+      try {
+        await updatePassword(user, newPassword);
+        console.log("Password updated successfully");
+      } catch (error) {
+        console.error("Error updating password:", error.message);
+      }
+    } else {
+      console.error("No user is currently signed in");
+    }
+  }
+
   return (
     <View style={styles.container}>
+      <Text style={styles.label}>Username</Text>
       <View style={styles.section}>
-        <Text style={styles.label}>Username</Text>
-        <Text style={styles.value}>Brandon456</Text>
+        <Text style={styles.value}>{username}</Text>
       </View>
       <Text style={styles.label}>Email</Text>
       <View style={styles.section}>
-        <Text style={styles.value}>email@domain.com</Text>
+        <Text style={styles.value}>{emailName}</Text>
       </View>
       <Text style={styles.label}>Change Password</Text>
       <View style={[styles.section, styles.changePasswordBox]}>
@@ -43,25 +63,6 @@ const profileAuth = () => {
         <View style={styles.buttonContainer}>
           <Button title="Update" color="#4B8DF7" />
         </View>
-      </View>
-      <View
-        style={[
-          styles.container,
-          { flexDirection: "row", justifyContent: "space-between" },
-        ]}
-      >
-        <TouchableOpacity
-          style={[styles.button, styles.cancelButton]}
-          onPress={handleCancel}
-        >
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.saveButton]}
-          onPress={handleSave}
-        >
-          <Text style={styles.buttonText}>Save</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
