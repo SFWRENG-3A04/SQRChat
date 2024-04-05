@@ -118,7 +118,6 @@ const ProfileHeader = ({ toggleAvailability }) => {
           style: "cancel"
         },
         { text: "Discard", onPress: () => {
-            setImage(null);
             setTempImage(null);
             saveBottomSheetRef.current.close();
           }
