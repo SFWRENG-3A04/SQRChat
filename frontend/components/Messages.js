@@ -58,36 +58,38 @@ export default function Messages({ messages, currentUserUid, users }) {
 
   return (
     <View>
-      {messages.map((message, index) => (
-        <TouchableWithoutFeedback
-          key={index}
-          onLongPress={() => handleLongPress(index)}
-        >
-          <View ref={messageRefs[index]} style={styles.messageContainer}>
-            <Animated.View
-              style={[
-                styles.messageBubble,
-                message.senderUid === currentUserUid ? styles.rightBubble : styles.leftBubble,
-              ]}>
-              <Text style={styles.senderName}>{getSenderName(message.senderUid)}</Text>
-              <Text style={styles.messageText}>{message.text}</Text>
-            </Animated.View>
-          </View>
-        </TouchableWithoutFeedback>
-      ))}
-      <Modal
-        transparent={true}
-        visible={isReactionsVisible}
-        animationType="none"
-        onRequestClose={dismissReactions}
+    {messages.map((message, index) => (
+      <TouchableWithoutFeedback
+        key={index}
+        onLongPress={() => handleLongPress(index)}
       >
-        <TouchableWithoutFeedback onPress={dismissReactions}>
-          <View style={[styles.modalOverlay, { top: reactionPos.y, left: reactionPos.x }]}>
+        <View ref={messageRefs[index]} style={styles.messageContainer}>
+          <Animated.View
+            style={[
+              styles.messageBubble,
+              message.senderUid === currentUserUid ? styles.rightBubble : styles.leftBubble,
+            ]}>
+            <Text style={styles.senderName}>{getSenderName(message.senderUid)}</Text>
+            <Text style={styles.messageText}>{message.text}</Text>
+          </Animated.View>
+        </View>
+      </TouchableWithoutFeedback>
+    ))}
+    <Modal
+      transparent={true}
+      visible={isReactionsVisible}
+      animationType="none"
+      onRequestClose={dismissReactions}
+    >
+      <TouchableWithoutFeedback onPress={dismissReactions}>
+        <View style={styles.fullScreenOverlay}>
+          <View style={[styles.reactionsContainer, { top: reactionPos.y, left: reactionPos.x }]}>
             <Reactions onSelect={handleSelectReaction} onUnsend={handleUnsend} />
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  </View>
   );
 }
 
@@ -122,5 +124,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     // Adjustments may be needed based on modal content size
     // This is an initial position, it will be overwritten by state
+  },
+  fullScreenOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  reactionsContainer: {
+    position: 'absolute',
+    // Other styling as needed for the Reactions component itself
   },
 });
