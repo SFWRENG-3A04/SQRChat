@@ -8,7 +8,7 @@ export default function Messages({ messages, currentUserUid, users }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View>
       {messages.map((message, index) => (
         <View
           key={index}
