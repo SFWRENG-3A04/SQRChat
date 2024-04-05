@@ -1,20 +1,25 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { getChats, getUser, getdmChats, getGroupChats } from '../mock/functions'
+/* import { getChats, getUser, getdmChats, getGroupChats } from '../mock/functions' */
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
 
-const Chat = ({ groupChats, onChatSelected }) => {
+/* const Chat = ({ groupChats, onChatSelected }) => { */
+const Chat = ({ groupChats, onChatSelected, users }) => {
  const navigation = useNavigation(); // Use the useNavigation hook
 
  const getUserNames = (participants) => {
   // Filter out the participant with ID 1
-  const filteredParticipants = participants.filter(uid => uid != 1);
- 
+  const filteredParticipants = participants.filter(uid => uid != auth.currentUser.uid);
+
+
+
   return filteredParticipants.map(uid => {
-     const user = getUser(uid);
-     return user ? user.displayName : 'Unknown';
-  }).join(', ');
+
+    const user = users.find((user) => user.uid === uid);
+    return user && user.displayName ? user.displayName : "Unknown";
+  })
+  .join(", ");
  };
 
  const getUserPhoto = (participants) => {
@@ -30,7 +35,7 @@ const Chat = ({ groupChats, onChatSelected }) => {
  return (
     <View style={styles.listContainer}>
      
-      {groupChats.map(chat => (
+      {groupChats.map((chat)=> (
         
         <TouchableOpacity
         

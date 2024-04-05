@@ -6,19 +6,42 @@ import { getChats, getUser, getdmChats, getGroupChats } from '../mock/functions'
 import Icon from'../assets/logo.png';
 import Background from '../assets/loginbackground.png';
 
+import { auth, db, ref } from "../services/firebase";
+import { onValue } from "firebase/database";
+
 export default function SelectMessageScreen({ navigation }) {
  const [groupChats, setGroupChats] = useState([]);
  const [dms, setDms] = useState([]);
  const [groupChatsVisible, setGroupChatsVisible] = useState(true);
  const [dmsVisible, setDmsVisible] = useState(true);
+ const currentUserUid = auth.currentUser.uid;
 
  useEffect(() => {
-    const groupChats = getGroupChats("1");
-    setGroupChats(groupChats);
-    const dmChats = getdmChats("1");
-    setDms(dmChats);
- }, []);
+   onValue(ref(db, "chats/"), (snapshot) => {
+     if (snapshot.exists()) {
+       chats = snapshot.val();
+       const groupChatsArray = [];
+       const dmsArray = [];
 
+       for (const chatId in chats) {
+         const chat = chats[chatId];
+         const participants = chat.participants;
+         // Check if current user is a participant in this chat
+         if (participants && participants.includes(currentUserUid)) {
+           // Check if it's a group chat or direct message
+           if (participants.length > 2) {
+             groupChatsArray.push(chat);
+           } else {
+             dmsArray.push(chat);
+           }
+         }
+       }
+
+       setGroupChats(groupChatsArray);
+       setDms(dmsArray);
+     }
+   });
+ }, []);
  const handleChatSelected = (chat) => {
     navigation.navigate('Chats', { chatDetails: chat });
  };

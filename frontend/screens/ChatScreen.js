@@ -1,9 +1,22 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import Messages from '../components/Messages';
 import { sendMessage,getUser } from '../mock/functions';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { io } from "socket.io-client";
+import { db, ref, auth } from "../services/firebase";
+import { update } from "firebase/database";
+import { backendEndpoint } from "../common/constants";
 
 export default function ChatScreen({route}) {
   const navigation = useNavigation(); // Get the navigation object
@@ -16,31 +29,74 @@ export default function ChatScreen({route}) {
       );
   }
 
-  const { chatDetails } = route.params;
-  const currentUserUid = "1";
-  const [messageText, setMessageText] = useState('');
+  const { chatDetails,users } = route.params;
+  const currentUserUid = auth.currentUser.uid;
+  const [socketInstance, setSocketInstance] = useState(null);
+  const [messages, setMessages] = useState(chatDetails.messages);
+  const [messageText, setMessageText] = useState("");
 
-  // Function to get participant names
+
   const getParticipantNames = (participants) => {
     // Filter out the participant with ID 1
-    const filteredParticipants = participants.filter(uid => uid != 1);
-   
+    const filteredParticipants = participants.filter(uid => uid != auth.currentUser.uid);
+  
+  
+  
     return filteredParticipants.map(uid => {
-       const user = getUser(uid);
-       return user ? user.displayName : 'Unknown';
-    }).join(', ');
+  
+      const user = users.find((user) => user.uid === uid);
+      return user && user.displayName ? user.displayName : "Unknown";
+    })
+    .join(", ");
    };
-  const handleMessageSend = () => {
-      if (messageText.trim()) {
-          const newMessage = {
-              senderUid: "1", // Assuming "1" is the UID of the current user
-              text: messageText.trim()
-          };
+   const handleMessageSend = () => {
+    if (messageText.trim()) {
+      const socketMessage = {
+        senderUid: currentUserUid,
+        text: messageText.trim(),
+        chatId: chatDetails.chatId,
+      };
 
-          sendMessage(chatDetails.chatId, newMessage);
-          setMessageText('');
-      }
+      socketInstance.emit("sendMessage", socketMessage);
+
+      const newMessage = {
+        senderUid: currentUserUid,
+        text: messageText.trim(),
+      };
+
+      const updatedChat = {
+        ...chatDetails,
+        messages: [...chatDetails.messages, newMessage],
+        lastUpdated: Date.now(), // Update lastUpdated timestamp
+      };
+
+      update(ref(db, `chats/${chatDetails.chatId}`), updatedChat);
+      setMessageText("");
+    }
   };
+  useEffect(() => {
+    const socket = io(`http://${backendEndpoint}`);
+
+    socket.on("connect", () => {
+      console.log("Socket connected");
+      socket.emit("joinRoom", chatDetails.chatId);
+    });
+
+    socket.on("message", (message) => {
+      console.log("Received message:", message);
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    setSocketInstance(socket);
+
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    return function cleanup() {
+      socket.disconnect();
+    };
+  }, [chatDetails.chatId]);
 
   return (
       <KeyboardAvoidingView 
@@ -56,14 +112,14 @@ export default function ChatScreen({route}) {
                   >
                       <Icon name="chevron-left" size={26} color="black" />
                   </TouchableOpacity>
-                  {chatDetails.participants.length === 2 ? (
+                  {participants.length === 2 ? (
                       <Text style={styles.participantsStyle}>{getParticipantNames(chatDetails.participants)}</Text>
                   ) : (
                       <Text style={styles.chatNameStyle}>{chatDetails.displayName || "Chat Name"}</Text>
                   )}
               </View>
               <ScrollView style={styles.messageContainer}>
-                  <Messages messages={chatDetails.messages} currentUserUid={currentUserUid} />
+                  <Messages messages={messages} currentUserUid={currentUserUid} />
               </ScrollView>
               <View style={styles.inputContainer}>
                   <TextInput

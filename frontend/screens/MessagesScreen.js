@@ -1,78 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { Image, ScrollView } from 'react-native';
-import { StyleSheet, FlatList, Text, ImageBackground, View, Button, TextInput, TouchableOpacity } from 'react-native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import SelectMessageScreen from './SelectMessageScreen';
-import MessageLogsScreen from './MessageLogsScreen';
-import Icon from '../assets/logo.png';
-import Background from '../assets/loginbackground.png';
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Button,
+  View,
+  ActivityIndicator,
+  Text,
+} from "react-native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import SelectMessageScreen from "./SelectMessageScreen";
+import MessageLogsScreen from "./MessageLogsScreen";
+import axios from "axios";
+import { backendEndpoint } from "../common/constants";
 
 const Stack = createNativeStackNavigator();
 
 export default function MessagesScreen({ route, navigation }) {
- return (
-    <ImageBackground source={Background} style={styles.Background}>
-      <View style={styles.imageContainer}>
-        <Image source={Icon} style={styles.topImage} />
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const LoadingScreen = () => {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading...</Text>
       </View>
-     
-        <View style={styles.container}>
-          <View style={styles.listContainer}>
-            <Stack.Navigator initialRouteName="SelectMessage">
-              <Stack.Screen
-                name="Group Chats"
-                component={SelectMessageScreen}
-                options={{
-                 headerTitle: '', // This line removes the title
-                }}
-              />
-              <Stack.Screen name="MessageLogs" component={MessageLogsScreen} />
-            </Stack.Navigator>
-          </View>
-        </View>
-   
-    </ImageBackground>
- );
+    );
+  };
+
+  useEffect(() => {
+    console.log("attempting to fetch users");
+    axios
+      .get(`http://${backendEndpoint}/get_user_list`)
+      .then((response) => {
+        setUsers(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error retrieving users:", error);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <Stack.Navigator initialRouteName="SelectMessage">
+      <Stack.Screen
+        name="SelectMessage"
+        component={
+          loading
+            ? LoadingScreen
+            : () => (
+                <SelectMessageScreen navigation={navigation} users={users} />
+              )
+        }
+        initialParams={{ users: users }} // Set initialParams here
+        options={({ route, navigation }) => ({
+          title: "Messages",
+          headerRight: () => (
+            <Button
+              title="Forward"
+              onPress={() =>
+                navigation.push("MessageLogs", {
+                  chatDetails: { id: "lol", name: "Forward button was hit" },
+                })
+              }
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="MessageLogs"
+        component={MessageLogsScreen}
+        initialParams={{ users: users }}
+      />
+    </Stack.Navigator>
+  );
 }
 
 const styles = StyleSheet.create({
- container: {
+  container: {
     flex: 1,
-    
-    alignItems: 'center',
-    justifyContent: 'center',
-    
- },
- imageContainer: {
-    width: '100%',
-    height: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-
-    
- },
- topImage: {
-    width: '25%',
-    height: '61%',
- },
-
- Background: {
-    width: '100%',
-    height: '100%',
-
- },
-
- listContainer:{
-
-
-
-    paddingBottom:20,
-
-    height:900,
-    width:'100%',
-    backgroundColor:'white',
-    
- },
-
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    width: "80%",
+  },
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
