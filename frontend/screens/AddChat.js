@@ -2,15 +2,15 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import ProfileHeader from '../components/profileComponents/profileHeader';
 
-export default function ProfileScreen({ navigation }) {
+export default function AddChat({ navigation }) {
   // Handler function when toggling availability
-  const toggleAvailability = (isAvailable) => {
+  const onToggleAvailability = (isAvailable) => {
     console.log(isAvailable ? 'Available' : 'Not available');
   };
 
   return (
     <View style={styles.container}>
-      <ProfileHeader toggleAvailability={toggleAvailability} />
+      <ProfileHeader onToggleAvailability={onToggleAvailability} />
     </View>
   );
 }
