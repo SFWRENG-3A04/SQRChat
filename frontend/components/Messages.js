@@ -15,19 +15,17 @@ export default function Messages({ messages, currentUserUid, users }) {
   const [reactionPos, setReactionPos] = useState({ x: 0, y: 0 });
   const [selectedMessageIndex, setSelectedMessageIndex] = useState(null);
   const messageRefs = useRef({}).current;
-  const scaleAnimations = useRef(messages.map(() => new Animated.Value(1))).current;
+  const [scaleAnimations, setScaleAnimations] = useState([]);
 
   useEffect(() => {
     // Reset refs and animations when messages change
-    messages.forEach((_, index) => {
-      messageRefs[index] = messageRefs[index] || React.createRef();
-      scaleAnimations[index] = scaleAnimations[index] || new Animated.Value(1);
-    });
+    const animations = (messages || []).map(() => new Animated.Value(1));
+    setScaleAnimations(animations);
   }, [messages]);
 
   const getSenderName = (uid) => {
     const user = users.find(user => user.uid === uid);
-    return user ? user.displayName : 'Unknown';
+    return user && user.displayName ? user.displayName : 'Unknown';
   };
 
   const animateBubble = (index, toValue) => {
@@ -74,7 +72,7 @@ export default function Messages({ messages, currentUserUid, users }) {
 
   return (
     <View>
-      {messages.map((message, index) => (
+      {messages && messages.map((message, index) => (
         <TouchableWithoutFeedback
           key={index}
           onLongPress={() => handleLongPress(index)}
@@ -83,7 +81,7 @@ export default function Messages({ messages, currentUserUid, users }) {
             <Animated.View
               style={[
                 styles.messageBubble,
-                { transform: [{ scale: scaleAnimations[index] }] },
+                { transform: [{ scale: scaleAnimations[index] ? scaleAnimations[index] : 1 }] }, // if smt breaks, prob this line
                 message.senderUid === currentUserUid ? styles.rightBubble : styles.leftBubble,
               ]}
             >

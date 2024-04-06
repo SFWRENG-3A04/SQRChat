@@ -22,7 +22,7 @@ export default function MessageLogsScreen({ route }) {
   const currentUserUid = auth.currentUser.uid;
 
   const [socketInstance, setSocketInstance] = useState(null);
-  const [messages, setMessages] = useState(chatDetails.messages);
+  const [messages, setMessages] = useState(chatDetails && chatDetails.messages ? chatDetails.messages : []);
   const [messageText, setMessageText] = useState("");
 
   const scrollViewRef = useRef();
@@ -72,8 +72,8 @@ export default function MessageLogsScreen({ route }) {
       };
 
       const updatedChat = {
-        ...chatDetails,
-        messages: [...chatDetails.messages, newMessage],
+        ...(chatDetails || []),
+        messages: chatDetails && Array.isArray(chatDetails.messages) ? [...chatDetails.messages, newMessage] : [newMessage],
         lastUpdated: Date.now(), // Update lastUpdated timestamp
       };
 
