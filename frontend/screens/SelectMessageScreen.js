@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { ChatContext } from "../context/ChatContext";
 import { View, Text, StyleSheet, ScrollView, Image, ImageBackground, TouchableOpacity,Modal,TextInput } from "react-native";
 import Chat from "../components/Chat";
 import { auth, db, ref } from "../services/firebase";
@@ -8,10 +9,8 @@ import Icon from'../assets/logo.png';
 import Background from '../assets/loginbackground.png';
 
 
-
-export default function SelectMessageScreen({ navigation, route, users }) {
-  const [groupChats, setGroupChats] = useState([]);
-  const [dms, setDms] = useState([]);
+export default function SelectMessageScreen({ navigation, users }) {
+  const { dms, groupChats, setSelectedChat } = useContext(ChatContext);
   const [groupChatsVisible, setGroupChatsVisible] = useState(true);
   const [dmsVisible, setDmsVisible] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -28,35 +27,9 @@ const closeModal = () => {
 
   const currentUserUid = auth.currentUser.uid;
 
-  useEffect(() => {
-    onValue(ref(db, "chats/"), (snapshot) => {
-      if (snapshot.exists()) {
-        chats = snapshot.val();
-        const groupChatsArray = [];
-        const dmsArray = [];
-
-        for (const chatId in chats) {
-          const chat = chats[chatId];
-          const participants = chat.participants;
-          // Check if current user is a participant in this chat
-          if (participants && participants.includes(currentUserUid)) {
-            // Check if it's a group chat or direct message
-            if (participants.length > 2) {
-              groupChatsArray.push(chat);
-            } else {
-              dmsArray.push(chat);
-            }
-          }
-        }
-
-        setGroupChats(groupChatsArray);
-        setDms(dmsArray);
-      }
-    });
-  }, []);
-
   const handleChatSelected = (chat) => {
-    navigation.navigate("MessageLogs", { chatDetails: chat });
+    setSelectedChat(chat);
+    navigation.navigate("MessageLogs");
   };
   const toggleGroupChatsVisibility = () => {
     setGroupChatsVisible(!groupChatsVisible);
