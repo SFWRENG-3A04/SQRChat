@@ -7,7 +7,7 @@ export const ChatContext = createContext();
 export const ChatProvider = ({ children }) => {
   const [groupChats, setGroupChats] = useState([]);
   const [dms, setDms] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(null);
+  const [selectedChat, setSelectedChat] = useState({});
 
   const currentUserUid = auth.currentUser.uid;
 
@@ -35,9 +35,14 @@ export const ChatProvider = ({ children }) => {
         setGroupChats(groupChatsArray);
         setDms(dmsArray);
 
-        console.log("New Data Detected", chatsData[selectedChat.chatId]);
-
-        if (selectedChat && chatsData[selectedChat.chatId]) {
+        // Check if selectedChat exists and if its chatId matches any in the updated data
+        if (
+          selectedChat &&
+          selectedChat.chatId &&
+          chatsData[selectedChat.chatId] &&
+          JSON.stringify(selectedChat) !==
+            JSON.stringify(chatsData[selectedChat.chatId]) // Compare current selectedChat with the one in snapshot
+        ) {
           console.log(
             "Setting New Selected Data",
             chatsData[selectedChat.chatId]
@@ -46,11 +51,10 @@ export const ChatProvider = ({ children }) => {
         }
       }
     });
-
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [selectedChat]);
 
   return (
     <ChatContext.Provider

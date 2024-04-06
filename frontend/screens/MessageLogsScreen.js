@@ -23,7 +23,6 @@ export default function MessageLogsScreen({ route }) {
   const currentUserUid = auth.currentUser.uid;
 
   const [socketInstance, setSocketInstance] = useState(null);
-  const [messages, setMessages] = useState(selectedChat.messages);
   const [messageText, setMessageText] = useState("");
 
   const scrollViewRef = useRef();
@@ -94,7 +93,6 @@ export default function MessageLogsScreen({ route }) {
 
     socket.on("message", (message) => {
       console.log("Received message:", message);
-      setMessages((prevMessages) => [...prevMessages, message]);
       scrollViewRef.current.scrollToEnd({ animated: true });
     });
 
@@ -124,7 +122,7 @@ export default function MessageLogsScreen({ route }) {
       >
         <Messages
           users={users}
-          messages={messages}
+          messages={selectedChat.messages}
           currentUserUid={currentUserUid}
         />
       </ScrollView>

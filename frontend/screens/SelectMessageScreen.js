@@ -8,7 +8,7 @@ export default function SelectMessageScreen({ navigation, users }) {
 
   const handleChatSelected = (chat) => {
     setSelectedChat(chat);
-    navigation.navigate("MessageLogs", { chatDetails: chat });
+    navigation.navigate("MessageLogs");
   };
 
   return (

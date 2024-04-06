@@ -62,7 +62,6 @@ const AddUsersScreen = ({ route, navigation }) => {
         navigation.goBack();
       })
       .catch((error) => {
-        // Handle any errors
         console.error("Error updating chat details:", error);
       });
   };

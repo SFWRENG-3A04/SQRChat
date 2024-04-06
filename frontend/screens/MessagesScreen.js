@@ -72,9 +72,7 @@ export default function MessagesScreen({ route, navigation }) {
                 <Button
                   title="Add +"
                   onPress={() => {
-                    navigation.navigate("Add Users", {
-                      chatDetails: route.params.chatDetails,
-                    });
+                    navigation.navigate("Add Users");
                   }}
                 />
               </View>
