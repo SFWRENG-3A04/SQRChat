@@ -53,19 +53,7 @@ export default function MessagesScreen({ route, navigation }) {
               )
         }
         initialParams={{ users: users }} // Set initialParams here
-        options={({ route, navigation }) => ({
-          title: "Messages",
-          headerRight: () => (
-            <Button
-              title="Forward"
-              onPress={() =>
-                navigation.push("MessageLogs", {
-                  chatDetails: { id: "lol", name: "Forward button was hit" },
-                })
-              }
-            />
-          ),
-        })}
+        
       />
       <Stack.Screen
         name="MessageLogs"
