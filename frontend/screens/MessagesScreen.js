@@ -9,8 +9,10 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SelectMessageScreen from "./SelectMessageScreen";
 import MessageLogsScreen from "./MessageLogsScreen";
+import AddUsersScreen from "./AddUsersScreen";
 import axios from "axios";
 import { backendEndpoint } from "../common/constants";
+import { ChatProvider } from "../context/ChatContext";
 
 const Stack = createNativeStackNavigator();
 
@@ -42,37 +44,52 @@ export default function MessagesScreen({ route, navigation }) {
   }, []);
 
   return (
-    <Stack.Navigator initialRouteName="SelectMessage">
-      <Stack.Screen
-        name="SelectMessage"
-        component={
-          loading
-            ? LoadingScreen
-            : () => (
-                <SelectMessageScreen navigation={navigation} users={users} />
-              )
-        }
-        initialParams={{ users: users }} // Set initialParams here
-        options={({ route, navigation }) => ({
-          title: "Messages",
-          headerRight: () => (
-            <Button
-              title="Forward"
-              onPress={() =>
-                navigation.push("MessageLogs", {
-                  chatDetails: { id: "lol", name: "Forward button was hit" },
-                })
-              }
-            />
-          ),
-        })}
-      />
-      <Stack.Screen
-        name="MessageLogs"
-        component={MessageLogsScreen}
-        initialParams={{ users: users }}
-      />
-    </Stack.Navigator>
+    <ChatProvider>
+      <Stack.Navigator initialRouteName="SelectMessage">
+        <Stack.Screen
+          name="SelectMessage"
+          component={
+            loading
+              ? LoadingScreen
+              : () => (
+                  <SelectMessageScreen navigation={navigation} users={users} />
+                )
+          }
+          initialParams={{ users: users }}
+          options={() => ({
+            title: "Messages",
+            headerShown: false,
+          })}
+        />
+        <Stack.Screen
+          name="MessageLogs"
+          component={MessageLogsScreen}
+          initialParams={{ users: users }}
+          options={({ route, navigation }) => ({
+            title: "Private Chat",
+            headerRight: () => (
+              <View style={{ flexDirection: "row" }}>
+                <Button
+                  title="Add +"
+                  onPress={() => {
+                    navigation.navigate("Add Users", {
+                      chatDetails: route.params.chatDetails,
+                    });
+                  }}
+                />
+              </View>
+            ),
+          })}
+        />
+        <Stack.Screen
+          name="Add Users"
+          component={AddUsersScreen}
+          initialParams={{
+            users: users,
+          }}
+        />
+      </Stack.Navigator>
+    </ChatProvider>
   );
 }
 
