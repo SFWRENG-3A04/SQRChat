@@ -7,6 +7,7 @@ import { getDatabase, set } from "firebase/database";
 import { onValue } from "firebase/database";
 import Icon from'../assets/logo.png';
 import Background from '../assets/loginbackground.png';
+import CreateChatModal from "../components/CreateChatModal";
 
 
 export default function SelectMessageScreen({ navigation, users }) {
@@ -104,43 +105,11 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
             <TouchableOpacity style={styles.NewChatBox} onPress={openModal}>
         <Text style={styles.NewChat}>+ Add Chat</Text>
       </TouchableOpacity>
-      <Modal visible={isModalVisible} onRequestClose={closeModal} animationType="slide">
- <View style={styles.modalContainer}>
-    <Text style={styles.modalTitle}>Add New Chat</Text>
-    <TextInput
-      style={styles.input}
-      placeholder="Chat Picture URL"
-      onChangeText={setChatPictureInput}
-      value={chatPictureInput}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Chat ID"
-      onChangeText={setChatIdInput}
-      value={chatIdInput}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Display Name"
-      onChangeText={setDisplayNameInput}
-      value={displayNameInput}
-    />
-
-<TextInput
- style={styles.input}
- placeholder="Participants (comma-separated)"
- onChangeText={setParticipantsInput}
- value={participantsInput}
-/>
-
-    <TouchableOpacity onPress={() => createNewChat(chatPictureInput,chatIdInput, displayNameInput, participantsInput)} style={styles.submitButton}>
-      <Text style={styles.submitButtonText}>Submit</Text>
-    </TouchableOpacity>
-    <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-      <Text style={styles.closeButtonText}>Close</Text>
-    </TouchableOpacity>
- </View>
-</Modal>
+      <CreateChatModal
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onChatCreated={createNewChat}
+      />
             </View>
           </ScrollView>                   
         )}
@@ -164,43 +133,11 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
             <TouchableOpacity style={styles.NewChatBox} onPress={openModal}>
         <Text style={styles.NewChat}>+ Add Chat</Text>
       </TouchableOpacity>
-      <Modal visible={isModalVisible} onRequestClose={closeModal} animationType="slide">
- <View style={styles.modalContainer}>
-    <Text style={styles.modalTitle}>Add New Chat</Text>
-    <TextInput
-      style={styles.input}
-      placeholder="Chat Picture URL"
-      onChangeText={setChatPictureInput}
-      value={chatPictureInput}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Chat ID"
-      onChangeText={setChatIdInput}
-      value={chatIdInput}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Display Name"
-      onChangeText={setDisplayNameInput}
-      value={displayNameInput}
-    />
-
-<TextInput
- style={styles.input}
- placeholder="Participants (comma-separated)"
- onChangeText={setParticipantsInput}
- value={participantsInput}
-/>
-
-    <TouchableOpacity onPress={() => createNewChat(chatPictureInput,chatIdInput, displayNameInput, participantsInput)} style={styles.submitButton}>
-      <Text style={styles.submitButtonText}>Submit</Text>
-    </TouchableOpacity>
-    <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-      <Text style={styles.closeButtonText}>Close</Text>
-    </TouchableOpacity>
- </View>
-</Modal>
+      <CreateChatModal
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onChatCreated={createNewChat}
+      />
             </View>
           </ScrollView>
         )}
