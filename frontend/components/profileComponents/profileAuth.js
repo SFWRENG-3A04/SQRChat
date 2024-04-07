@@ -1,13 +1,13 @@
 import React, { useState, useRef } from "react";
 import {StyleSheet, View, Text, TextInput, Button, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, ScrollView} from "react-native";
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import { auth } from '../../services/firebase'
 
-const profileAuth = ({user}) => {
+const ProfileAuth = ({user}) => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [username, setUsername] = useState(user.displayName)
   const [email, setEmail] = useState(user.email)
+  const [notification, setNotification] = useState(null);
 
   const scrollViewRef = useRef(null);
   
@@ -18,8 +18,14 @@ const profileAuth = ({user}) => {
         await reauthenticateWithCredential(user, credential);
         await updatePassword(user, newPassword);
         console.log("Password updated successfully");
+        showNotification("Password updated successfully");
+        setCurrentPassword("");
+        setNewPassword("");
       } catch (error) {
         console.error("Error updating password:", error.message);
+        showNotification("Error updating password");
+        setCurrentPassword("");
+        setNewPassword("");
       }
     } else {
       console.error("No user is currently signed in");
@@ -27,16 +33,23 @@ const profileAuth = ({user}) => {
     scrollViewRef.current.scrollToEnd({ animated: true });
   }
 
+  const showNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => {
+      setNotification(null);
+    }, 5000); // Hide notification after 3 seconds
+  };
+
   return (
     <ScrollView
       ref={scrollViewRef}
       contentContainerStyle={styles.scrollViewContent}
       keyboardShouldPersistTaps="handled"
-      >
+    >
       <KeyboardAvoidingView behavior="height" style={{flex: 1}}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View>
-            <Text style={styles.label}>Username</Text>
+            <Text style={styles.label}>Display Name</Text>
             <View style={styles.section}>
               <Text style={styles.value}>{username}</Text>
             </View>
@@ -60,8 +73,14 @@ const profileAuth = ({user}) => {
                   secureTextEntry
                   value={newPassword}
                   onChangeText={(text) => setNewPassword(text)}
+                  onFocus={() => scrollViewRef.current.scrollToEnd({ animated: true })}
                 />
               </View>
+              {notification && (
+                <View style={styles.notificationContainer}>
+                  <Text style={styles.notification}>{notification}</Text>
+                </View>
+              )}
               <View style={styles.buttonContainer}>
                 <Button
                   title="Update"
@@ -69,13 +88,12 @@ const profileAuth = ({user}) => {
                   onPress={() => {
                     handleChangePassword(newPassword);
                     Keyboard.dismiss(); // Dismiss keyboard after pressing "Update"
-                  }
-                }
+                  }}
                 />
               </View>
             </View>
           </View>
-          </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </ScrollView>
   );
@@ -131,6 +149,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
+  notificationContainer: {
+    backgroundColor: "#FCEBBF",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  notification: {
+    textAlign: 'center',
+  },
 });
 
-export default profileAuth;
+export default ProfileAuth;
