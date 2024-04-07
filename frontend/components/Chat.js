@@ -7,22 +7,21 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
 
  const currentUserUid = auth.currentUser.uid;
 
+ // Function to get user names from their UIDs
  const getUserNames = (participants) => {
-  const filteredParticipants = participants.filter(uid => uid !== currentUserUid);
- 
-  return filteredParticipants
-     .map((uid) => {
-       const user = users.find((user) => user.uid === uid);
-       return user && user.displayName ? user.displayName : "Unknown";
-     })
-     .join(", ");
+    const filteredParticipants = participants.filter(uid => uid != currentUserUid);
+    return filteredParticipants.map(uid => {
+       const user = getUser(uid);
+       return user ? user.displayName : 'Unknown';
+    }).join(', ');
  };
+
  const getUserPhoto = (participants) => {
-  const otherParticipantUid = participants.find(uid => uid !== auth.currentUser.uid);
-
-  const otherUser = users.find(user => user.uid === otherParticipantUid);
-
-  return otherUser ? otherUser.photoURL : null;
+    const filteredParticipants = participants.filter(uid => uid != currentUserUid);
+    return filteredParticipants.map(uid => {
+       const user = getUser(uid);
+       return user ? user.photoUrl : 'Unknown';
+    }).join(', ');
  };
 
  return (
