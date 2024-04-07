@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
-import { ChatContext } from "../context/ChatContext";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, Image, ImageBackground, TouchableOpacity,Modal,TextInput } from "react-native";
 import Chat from "../components/Chat";
 import { auth, db, ref } from "../services/firebase";
@@ -9,8 +8,10 @@ import Icon from'../assets/logo.png';
 import Background from '../assets/loginbackground.png';
 
 
-export default function SelectMessageScreen({ navigation, users }) {
-  const { dms, groupChats, setSelectedChat } = useContext(ChatContext);
+
+export default function SelectMessageScreen({ navigation, route, users }) {
+  const [groupChats, setGroupChats] = useState([]);
+  const [dms, setDms] = useState([]);
   const [groupChatsVisible, setGroupChatsVisible] = useState(true);
   const [dmsVisible, setDmsVisible] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -25,7 +26,6 @@ const closeModal = () => {
 };
 
   const currentUserUid = auth.currentUser.uid;
-
 
   useEffect(() => {
     onValue(ref(db, "chats/"), (snapshot) => {
@@ -53,10 +53,8 @@ const closeModal = () => {
     });
   }, []);
 
-
   const handleChatSelected = (chat) => {
-    setSelectedChat(chat);
-    navigation.navigate("MessageLogs");
+    navigation.navigate("MessageLogs", { chatDetails: chat });
   };
   const toggleGroupChatsVisibility = () => {
     setGroupChatsVisible(!groupChatsVisible);
