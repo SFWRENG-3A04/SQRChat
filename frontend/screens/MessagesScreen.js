@@ -4,7 +4,7 @@ import {
   Button,
   View,
   ActivityIndicator,
-  Text,
+  Text, TouchableOpacity
 } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SelectMessageScreen from "./SelectMessageScreen";
@@ -59,6 +59,7 @@ export default function MessagesScreen({ route, navigation }) {
         name="MessageLogs"
         component={MessageLogsScreen}
         initialParams={{ users: users }}
+        options={{ title: 'Messages' }}
       />
     </Stack.Navigator>
   );

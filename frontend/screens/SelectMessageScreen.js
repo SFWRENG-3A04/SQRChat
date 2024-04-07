@@ -76,32 +76,32 @@ const [participantsInput, setParticipantsInput] = useState('');
 const createNewChat = async (chatPicture,chatId, displayName, participants) => {
   try {
      const db = getDatabase();
-     // Use optional chaining and provide a fallback value to prevent calling split on undefined
      const participantsArray = (participants ?? '').split(',').map(participant => participant.trim());
- 
-     // Construct the participants object with numeric keys
+  participantsArray.push(currentUserUid);
      const participantsObject = {};
      participantsArray.forEach((participant, index) => {
        participantsObject[index] = participant;
      });
  
      const chatData = {
-      pictureUrl:chatPicture,
+      pictureURL:chatPicture,
        chatId: chatId,
        displayName: displayName,
-       lastUpdated: new Date().toISOString(), // Use current date for Realtime Database
-       participants: participantsObject, // Store participants as an object with numeric keys
+       lastUpdated: new Date().toISOString(),
+       participants: participantsObject,
      };
  
-     // Add the chat data to the 'chats' collection
+
      await set(ref(db, `chats/${chatId}`), chatData);
  
      console.log('Chat created successfully');
-     closeModal(); // Close the modal after successful creation
+     closeModal();
   } catch (error) {
      console.error('Error creating new chat:', error);
   }
  };
+
+ 
   return (
     <ImageBackground source={Background} style={styles.Background}>
       <View style={styles.banner}>
@@ -112,7 +112,7 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
     <Image
       style={{ width: 30, height: 30, marginRight: 10, marginLeft: 10 }}
-      source={require('../assets/DMs.png')} // Ensure this path is correct
+      source={require('../assets/DMs.png')}
     />
     <Text style={styles.title}>Group Chats</Text>
     <Image
@@ -155,7 +155,7 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
 
 <TextInput
  style={styles.input}
- placeholder="Participants (comma-separated)"
+ placeholder="ParticipantIDs (comma-separated)"
  onChangeText={setParticipantsInput}
  value={participantsInput}
 />
@@ -175,7 +175,7 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
     <Image
       style={{ width: 30, height: 30, marginRight: 10, marginLeft: 10 }}
-      source={require('../assets/TeamChat.png')} // Ensure this path is correct
+      source={require('../assets/TeamChat.png')}
     />
     <Text style={styles.title}>DMs</Text>
     <Image
@@ -215,7 +215,7 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
 
 <TextInput
  style={styles.input}
- placeholder="Participants (comma-separated)"
+ placeholder="ParticipantIDs (comma-separated)"
  onChangeText={setParticipantsInput}
  value={participantsInput}
 />
@@ -236,16 +236,6 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
  );
 }
 
-{/*       <Chat
-        users={users}
-        groupChats={groupChats}
-        onChatSelected={handleChatSelected}
-      />
-      <Chat
-        users={users}
-        groupChats={dms}
-        onChatSelected={handleChatSelected}
-      /> */}
 
 const styles = StyleSheet.create({
   container: {
@@ -288,9 +278,8 @@ const styles = StyleSheet.create({
   },
   banner:{
     backgroundColor:'white',
-    alignItems: 'center', // This will center the Image horizontally
-    justifyContent: 'center', // This will center the Image vertically
-    shadowColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.9,
     shadowRadius: 3.84,
@@ -308,17 +297,17 @@ const styles = StyleSheet.create({
   },
   NewChatBox:{
     backgroundColor:'#C3E2FF',
-    alignItems: 'center', // This will center the Image horizontally
-    justifyContent: 'center', // This will center the Image vertically
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalContainer: {
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 5,
     alignItems: 'center',
-    justifyContent: 'center', // Center the content vertically
-    width: '80%', // Adjust the width as needed
-    height: '40%', // Adjust the height as needed
+    justifyContent: 'center',
+    width: '80%',
+    height: '40%',
  },
  modalTitle: {
     fontSize: 20,
@@ -363,17 +352,17 @@ const styles = StyleSheet.create({
   padding: 20,
   borderRadius: 5,
   alignItems: 'center',
-  justifyContent: 'center', // Center the content vertically
-  width: '80%', // Adjust the width as needed
-  height: '40%', // Adjust the height as needed
-  marginTop: '10%', // Adjust the top margin as needed
-  marginBottom: '10%', // Adjust the bottom margin as needed
+  justifyContent: 'center',
+  width: '80%',
+  height: '40%',
+  marginTop: '10%',
+  marginBottom: '10%',
 },
 modalTitle: {
   fontSize: 20,
   fontWeight: 'bold',
   marginBottom: 20,
-  textAlign: 'center', // Center the title text
+  textAlign: 'center',
 },
 input: {
   height: 40,
@@ -382,7 +371,7 @@ input: {
   marginBottom: 10,
   paddingLeft: 10,
   width: '100%',
-  borderRadius: 5, // Add border radius to inputs
+  borderRadius: 5,
 },
 submitButton: {
   backgroundColor: '#6FBAFF',
@@ -409,5 +398,4 @@ closeButtonText: {
   fontSize: 16,
   fontWeight: 'bold',
 },
- 
  });
