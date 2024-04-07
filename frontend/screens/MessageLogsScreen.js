@@ -1,4 +1,4 @@
-// Adjustments within MessageLogsScreen component
+
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
@@ -57,7 +57,7 @@ export default function MessageLogsScreen({ route }) {
 
   const _keyboardDidShow = () => {
     console.log('Keyboard shown');
-    // Run any additional code here when the keyboard comes up
+
     scrollDown(0)
   };
 
@@ -79,7 +79,7 @@ export default function MessageLogsScreen({ route }) {
       const updatedChat = {
         ...(chatDetails || []),
         messages: chatDetails && Array.isArray(chatDetails.messages) ? [...chatDetails.messages, newMessage] : [newMessage],
-        lastUpdated: Date.now(), // Update lastUpdated timestamp
+        lastUpdated: Date.now(),
       };
 
       update(ref(db, `chats/${chatDetails.chatId}`), updatedChat);
@@ -112,35 +112,32 @@ export default function MessageLogsScreen({ route }) {
       socket.disconnect();
     };
   }, [chatDetails.chatId]);
- // State for controlling dropdown visibility
+
  const [dropdownVisible, setDropdownVisible] = useState(false);
  const [isModalVisible, setIsModalVisible] = useState(false);
 
- // Function to toggle dropdown visibility
  const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
  };
 
- // Function to handle option selection
+
  const handleOptionSelect = (option) => {
     console.log(`Selected option: ${option}`);
-    // Implement functionality for "Rename Chat" and "Delete Chat" here
-    setDropdownVisible(false); // Close the dropdown after selection
+
+    setDropdownVisible(false);
  };
 
  const handleDeleteChat = () => {
   const db = getDatabase();
-  const chatId = chatDetails.chatId; // Assuming chatDetails.chatId is the unique identifier for the chat
+  const chatId = chatDetails.chatId;
  
-  // Reference to the chat node in the database
   const chatRef = ref(db, `chats/${chatId}`);
- 
-  // Delete the chat node
+
   remove(chatRef)
      .then(() => {
        console.log('Chat deleted successfully');
        navigation.goBack();
-       // Optionally, navigate the user back or to a different screen
+
      })
      .catch((error) => {
        console.error('Error deleting chat:', error);
@@ -149,22 +146,20 @@ export default function MessageLogsScreen({ route }) {
 
  const handleRenameChat = (newChatName) => {
   const db = getDatabase();
-  const chatId = chatDetails.chatId; // Assuming chatDetails.chatId is the unique identifier for the chat
- 
-  // Reference to the chat node in the database
+  const chatId = chatDetails.chatId;
+
   const chatRef = ref(db, `chats/${chatId}`);
- 
-  // Update the chat name
+
   update(chatRef, { displayName: newChatName })
      .then(() => {
        console.log('Chat renamed successfully');
-       // Optionally, update the UI to reflect the new chat name
+      
      })
      .catch((error) => {
        console.error('Error renaming chat:', error);
      });
      console.log('New chat name:', newChatName);
-    setIsModalVisible(false); // Close the modal after renaming
+    setIsModalVisible(false); 
  };
   return (
 

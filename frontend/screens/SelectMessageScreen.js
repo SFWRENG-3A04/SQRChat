@@ -15,13 +15,12 @@ export default function SelectMessageScreen({ navigation, route, users }) {
   const [groupChatsVisible, setGroupChatsVisible] = useState(true);
   const [dmsVisible, setDmsVisible] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  
-   // Function to open the modal
+
  const openModal = () => {
   setIsModalVisible(true);
 };
 
-// Function to close the modal
+
 const closeModal = () => {
   setIsModalVisible(false);
 };
@@ -38,9 +37,8 @@ const closeModal = () => {
         for (const chatId in chats) {
           const chat = chats[chatId];
           const participants = chat.participants;
-          // Check if current user is a participant in this chat
           if (participants && participants.includes(currentUserUid)) {
-            // Check if it's a group chat or direct message
+
             if (participants.length > 2) {
               groupChatsArray.push(chat);
             } else {
