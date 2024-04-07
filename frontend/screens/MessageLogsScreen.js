@@ -84,8 +84,8 @@ export default function MessageLogsScreen({ route }) {
 
       const updatedChat = {
 
-        ...(selectedChat || []),
-        messages: selectedChat && Array.isArray(selectedChat.messages) ? [...selectedChat.messages, newMessage] : [newMessage],
+        ...selectedChat,
+        messages: [...selectedChat.messages, newMessage],
         lastUpdated: Date.now(),
 
       };
@@ -136,7 +136,7 @@ export default function MessageLogsScreen({ route }) {
 
  const handleDeleteChat = () => {
   const db = getDatabase();
-  const chatId = chatDetails.chatId;
+  const chatId = selectedChat.chatId;
  
   const chatRef = ref(db, `chats/${chatId}`);
 
@@ -153,7 +153,7 @@ export default function MessageLogsScreen({ route }) {
 
  const handleRenameChat = (newChatName) => {
   const db = getDatabase();
-  const chatId = chatDetails.chatId;
+  const chatId = selectedChat.chatId;
 
   const chatRef = ref(db, `chats/${chatId}`);
 
