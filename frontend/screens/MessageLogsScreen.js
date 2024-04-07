@@ -1,5 +1,6 @@
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
+
 import {
   View,
   Text,
@@ -19,15 +20,18 @@ import { db, ref, auth } from "../services/firebase";
 import { getDatabase,  remove } from "firebase/database";
 import { update } from "firebase/database";
 import { backendEndpoint } from "../common/constants";
+
+import { ChatContext } from "../context/ChatContext";
 import Send from'../assets/Send.png';
 
 export default function MessageLogsScreen({ route }) {
   const navigation = useNavigation();
   const { chatDetails, users } = route.params;
+  const { selectedChat } = useContext(ChatContext);
+
   const currentUserUid = auth.currentUser.uid;
 
   const [socketInstance, setSocketInstance] = useState(null);
-  const [messages, setMessages] = useState(chatDetails && chatDetails.messages ? chatDetails.messages : []);
   const [messageText, setMessageText] = useState("");
 
   const scrollViewRef = useRef();
@@ -36,18 +40,18 @@ export default function MessageLogsScreen({ route }) {
     const timer = setTimeout(() => {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }, time);
-  
-    return () => clearTimeout(timer);
-  }
 
-  useEffect(() =>{
-    scrollDown(200)
-  }, [])
+    return () => clearTimeout(timer);
+  };
+
+  useEffect(() => {
+    scrollDown(200);
+  }, []);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      _keyboardDidShow,
+      "keyboardDidShow",
+      _keyboardDidShow
     );
 
     return () => {
@@ -56,9 +60,11 @@ export default function MessageLogsScreen({ route }) {
   }, []);
 
   const _keyboardDidShow = () => {
-    console.log('Keyboard shown');
+
+    console.log("Keyboard shown");
 
     scrollDown(0)
+
   };
 
   const handleMessageSend = () => {
@@ -66,7 +72,7 @@ export default function MessageLogsScreen({ route }) {
       const socketMessage = {
         senderUid: currentUserUid,
         text: messageText.trim(),
-        chatId: chatDetails.chatId,
+        chatId: selectedChat.chatId,
       };
 
       socketInstance.emit("sendMessage", socketMessage);
@@ -77,12 +83,14 @@ export default function MessageLogsScreen({ route }) {
       };
 
       const updatedChat = {
-        ...(chatDetails || []),
-        messages: chatDetails && Array.isArray(chatDetails.messages) ? [...chatDetails.messages, newMessage] : [newMessage],
+
+        ...(selectedChat || []),
+        messages: selectedChat && Array.isArray(selectedChat.messages) ? [...selectedChat.messages, newMessage] : [newMessage],
         lastUpdated: Date.now(),
+
       };
 
-      update(ref(db, `chats/${chatDetails.chatId}`), updatedChat);
+      update(ref(db, `chats/${selectedChat.chatId}`), updatedChat);
       setMessageText("");
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
@@ -93,12 +101,11 @@ export default function MessageLogsScreen({ route }) {
 
     socket.on("connect", () => {
       console.log("Socket connected");
-      socket.emit("joinRoom", chatDetails.chatId);
+      socket.emit("joinRoom", selectedChat.chatId);
     });
 
     socket.on("message", (message) => {
       console.log("Received message:", message);
-      setMessages((prevMessages) => [...prevMessages, message]);
       scrollViewRef.current.scrollToEnd({ animated: true });
     });
 
@@ -111,7 +118,7 @@ export default function MessageLogsScreen({ route }) {
     return function cleanup() {
       socket.disconnect();
     };
-  }, [chatDetails.chatId]);
+  }, [selectedChat.chatId]);
 
  const [dropdownVisible, setDropdownVisible] = useState(false);
  const [isModalVisible, setIsModalVisible] = useState(false);
@@ -172,13 +179,15 @@ export default function MessageLogsScreen({ route }) {
       <ScrollView
         style={styles.messageContainer}
         ref={scrollViewRef}
-        onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+        onContentSizeChange={() =>
+          scrollViewRef.current.scrollToEnd({ animated: true })
+        }
       >
       
 
         <Messages
           users={users}
-          messages={messages}
+          messages={selectedChat.messages}
           currentUserUid={currentUserUid}
         />
       </ScrollView>
