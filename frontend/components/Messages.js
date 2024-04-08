@@ -141,6 +141,7 @@ export default function Messages({ messages, currentUserUid, users }) {
 
   return (
     <View>
+      <Text style={styles.startOfChat}>Start of chat</Text>
       {messages &&
         messages.map((message, index) => (
           <TouchableWithoutFeedback
@@ -269,5 +270,11 @@ const styles = StyleSheet.create({
   },
   reactionText: {
     fontSize: 14, // Adjust text size as needed
+  },
+  startOfChat: {
+    textAlign: "center",
+    marginTop: 10,
+    marginBottom: 10,
+    color: "#708090",
   },
 });
