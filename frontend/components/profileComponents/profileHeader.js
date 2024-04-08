@@ -2,9 +2,11 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Alert, View, Image, Switch, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import * as ImagePicker from 'expo-image-picker';
-import { Camera, CameraType } from 'expo-camera';
+import { auth } from "../../services/firebase";
+import { updateProfile } from "firebase/auth";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
-const ProfileHeader = ({ toggleAvailability }) => {
+const ProfileHeader = ({ toggleAvailability, userId }) => {
   const [isAvailable, setIsAvailable] = useState(false);
   const [image, setImage] = useState(null);
   const [tempImage, setTempImage] = useState(null);
@@ -19,11 +21,19 @@ const ProfileHeader = ({ toggleAvailability }) => {
     toggleAvailability && toggleAvailability(!isAvailable);
   };
 
+  useEffect(() => {
+    if (auth.currentUser) {
+      const imageUrl = auth.currentUser.photoURL || require('../../assets/employeeImage.png');
+      setImage(imageUrl);
+    }
+  }, []);
+
   const checkCameraPermissions = async () => {
     if (cameraStatus.status !== 'granted') {
       const { status } = await requestCameraPermissions();
       return status === 'granted';
     }
+
     return true;
   };
 
@@ -32,11 +42,13 @@ const ProfileHeader = ({ toggleAvailability }) => {
       const { status } = await requestMediaPermissions();
       return status === 'granted';
     }
+
     return true;
   };
 
   const takePhotoCamera = async () => {
 	  const hasCameraPermission = await checkCameraPermissions();
+
     if (!hasCameraPermission) {
         Alert.alert(
             'Permission Required',
@@ -49,15 +61,19 @@ const ProfileHeader = ({ toggleAvailability }) => {
                 },
             ],
         );
+
         return;
     }
+
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.5,
     });
+
     if (!result.cancelled && result.assets && result.assets.length > 0) {
+      console.log(result.assets[0].uri);
       setTempImage(result.assets[0].uri);
       uploadBottomSheetRef.current.close();
       setTimeout(() => {
@@ -70,6 +86,7 @@ const ProfileHeader = ({ toggleAvailability }) => {
 
   const choosePhotoLibrary = async () => {
 	  const hasMediaPermission = await checkMediaPermissions();
+
     if (!hasMediaPermission) {
         Alert.alert(
             'Permission Required',
@@ -84,12 +101,14 @@ const ProfileHeader = ({ toggleAvailability }) => {
         );
         return;
     }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
+
     if (!result.cancelled && result.assets && result.assets.length > 0) {
       setTempImage(result.assets[0].uri);
       uploadBottomSheetRef.current.close();
@@ -101,8 +120,33 @@ const ProfileHeader = ({ toggleAvailability }) => {
     }
   };
 
-  const saveProfilePicture = () => {
-    setImage(tempImage);
+
+
+  const saveProfilePicture = async () => {
+    if (!tempImage || !auth.currentUser) return; 
+
+    const storage = getStorage();
+  
+    const imageRef = storageRef(storage, `profilePictures/${auth.currentUser.uid}/${Date.now()}`);
+    const response = await fetch(tempImage);
+    const blob = await response.blob();
+
+    try {
+        await uploadBytes(imageRef, blob);
+        const downloadURL = await getDownloadURL(imageRef);
+
+        await updateProfile(auth.currentUser, {
+            displayName: "Jane Q. User",
+            photoURL: downloadURL
+        });
+        console.log("Firebase Auth profile updated");
+        console.log("New Image URL:", downloadURL);
+
+        setImage(downloadURL);
+    } catch (error) {
+        console.error("Failed uploading image and updating profile: ", error);
+    }
+
     setTempImage(null);
     saveBottomSheetRef.current.close();
   };
@@ -126,13 +170,13 @@ const ProfileHeader = ({ toggleAvailability }) => {
     );
   };
   
-
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => uploadBottomSheetRef.current.open()} style={styles.profileImageContainer}>
         <Image 
-          source={image ? { uri: image } : require('../../assets/profile-placeholder.png')}
+          source={typeof image === 'string' ? { uri: image } : image}
           style={styles.profileImage}
+          key={image}
         />
         <Image
           source={require('../../assets/edit-icon.png')}
