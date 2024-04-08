@@ -17,13 +17,26 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
      })
      .join(", ");
  };
- const getUserPhoto = (participants) => {
-  const otherParticipantUid = participants.find(uid => uid !== auth.currentUser.uid);
 
-  const otherUser = users.find(user => user.uid === otherParticipantUid);
-
-  return otherUser ? otherUser.photoURL : null;
+ const getOtherUserId = (participants, currentUserUid) => {
+ const otherUser = participants.filter(uid => uid !== currentUserUid)[0];
+ const user = users.find((user) => user.uid === otherUser);
+ const otherUserDisplayName = user ? user.displayName : "Unknown";
+ return otherUserDisplayName;
  };
+
+ const getUserPhoto = (participants, currentUserUid) => {
+  const otherUser = participants.filter(uid => uid !== currentUserUid)[0];
+  const user = users.find((user) => user.uid === otherUser);
+  console.log(user);
+  return user ? user.photoUrl : 'Unknown';
+  
+
+  };
+ 
+
+
+
 
  return (
     <View style={styles.listContainer}>
@@ -41,7 +54,8 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
               {chat.participants.length === 2 && (
                 <Image
                  style={styles.chatImageStyle} 
-                 source={{uri: getUserPhoto(chat.participants)}}
+                 /* source={{uri: getUserPhoto(chat.participants)}} */
+                 source={{uri:getUserPhoto(chat.participants,currentUserUid)}}
                 />
               )}
               {chat.participants.length != 2 && (
@@ -53,6 +67,8 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
               {chat.participants.length === 2 && (
                 <Text style={styles.participantsStyle}>
                  {getUserNames(chat.participants)}
+                
+                
                 </Text>
               )}
               {chat.participants.length != 2 && (
