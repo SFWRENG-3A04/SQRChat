@@ -159,7 +159,7 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
 </TouchableOpacity>
 {dmsVisible && (
           <ScrollView style={styles.chatcontainer}>
-            <Chat groupChats={dms} onChatSelected={handleChatSelected} />
+             <Chat users={users} groupChats={dms} onChatSelected={handleChatSelected} />
             <View style={styles.NewChatBox}>
             <TouchableOpacity style={styles.NewChatBox} onPress={openModal}>
         <Text style={styles.NewChat}>+ Add Chat</Text>
