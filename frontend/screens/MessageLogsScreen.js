@@ -83,9 +83,8 @@ export default function MessageLogsScreen({ route }) {
       };
 
       const updatedChat = {
-
-        ...selectedChat,
-        messages: [...selectedChat.messages, newMessage],
+        ...(selectedChat || []),
+        messages: selectedChat && Array.isArray(selectedChat.messages) ? [...selectedChat.messages, newMessage] : [newMessage],
         lastUpdated: Date.now(),
 
       };
