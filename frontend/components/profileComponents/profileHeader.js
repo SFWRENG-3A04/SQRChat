@@ -2,9 +2,10 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Alert, View, Image, Switch, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import * as ImagePicker from 'expo-image-picker';
-import { auth } from "../../services/firebase";
 import { updateProfile } from "firebase/auth";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getDatabase, ref, set, onValue } from "firebase/database";
+
 
 const ProfileHeader = ({ toggleAvailability, userId }) => {
   const [isAvailable, setIsAvailable] = useState(false);
@@ -16,17 +17,40 @@ const ProfileHeader = ({ toggleAvailability, userId }) => {
   const [cameraStatus, requestCameraPermissions] = ImagePicker.useCameraPermissions();
   const [mediaStatus, requestMediaPermissions] = ImagePicker.useMediaLibraryPermissions();
 
+  const database = getDatabase();
+
   const toggleSwitch = () => {
-    setIsAvailable(prevState => !prevState);
-    toggleAvailability && toggleAvailability(!isAvailable);
+    const newAvailability = !isAvailable;
+    setIsAvailable(newAvailability);
+
+    if (userId) {
+      const userAvailabilityRef = ref(database, `users/${userId.uid}/availability`);
+
+      set(userAvailabilityRef, newAvailability)
+        .then(() => {
+          console.log("User availability updated successfully");
+          toggleAvailability && toggleAvailability(newAvailability);
+        })
+        .catch((error) => {
+          console.error("Failed updating user availability: ", error);
+        });
+    }
   };
 
   useEffect(() => {
-    if (auth.currentUser) {
-      const imageUrl = auth.currentUser.photoURL || require('../../assets/employeeImage.png');
+    if (userId) {
+      const imageUrl = userId.photoURL || require('../../assets/employeeImage.png');
       setImage(imageUrl);
+
+      const userAvailabilityRef = ref(database, `users/${userId.uid}/availability`);
+      const unsubscribe = onValue(userAvailabilityRef, (snapshot) => {
+        const databaseStatus = snapshot.val();
+        setIsAvailable(databaseStatus);
+      });
+
+      return () => unsubscribe();
     }
-  }, []);
+  }, [userId, database]);
 
   const checkCameraPermissions = async () => {
     if (cameraStatus.status !== 'granted') {
@@ -123,11 +147,11 @@ const ProfileHeader = ({ toggleAvailability, userId }) => {
 
 
   const saveProfilePicture = async () => {
-    if (!tempImage || !auth.currentUser) return; 
+    if (!tempImage || !userId) return; 
 
     const storage = getStorage();
   
-    const imageRef = storageRef(storage, `profilePictures/${auth.currentUser.uid}/${Date.now()}`);
+    const imageRef = storageRef(storage, `profilePictures/${userId.uid}/${Date.now()}`);
     const response = await fetch(tempImage);
     const blob = await response.blob();
 
@@ -135,7 +159,7 @@ const ProfileHeader = ({ toggleAvailability, userId }) => {
         await uploadBytes(imageRef, blob);
         const downloadURL = await getDownloadURL(imageRef);
 
-        await updateProfile(auth.currentUser, {
+        await updateProfile(userId, {
             displayName: "Jane Q. User",
             photoURL: downloadURL
         });
