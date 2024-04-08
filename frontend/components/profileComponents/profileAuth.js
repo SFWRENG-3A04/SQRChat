@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import {StyleSheet, View, Text, TextInput, Button, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, ScrollView} from "react-native";
+import {StyleSheet, View, Text, TextInput, Button, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, ScrollView, Dimensions} from "react-native";
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 
 const ProfileAuth = ({user}) => {
@@ -48,6 +48,7 @@ const ProfileAuth = ({user}) => {
     >
       <KeyboardAvoidingView behavior="height" style={{flex: 1}}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.background}>
           <View>
             <Text style={styles.label}>Display Name</Text>
             <View style={styles.section}>
@@ -82,9 +83,7 @@ const ProfileAuth = ({user}) => {
                 </View>
               )}
               <View style={styles.buttonContainer}>
-                <Button
-                  title="Update"
-                  color="#4B8DF7"
+                <Button title="Update" color="#4B8DF7" 
                   onPress={() => {
                     handleChangePassword(newPassword);
                     Keyboard.dismiss(); // Dismiss keyboard after pressing "Update"
@@ -93,17 +92,27 @@ const ProfileAuth = ({user}) => {
               </View>
             </View>
           </View>
+          </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </ScrollView>
   );
 };
 
+const windowWidth = Dimensions.get('window').width;
+
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#F8F8F8",
+    backgroundColor: "#C3E2FF",
+    width: windowWidth,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  container: {
+    flex: 1,
   },
   section: {
     marginBottom: 20,
@@ -115,6 +124,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 5,
+    width: 300,
   },
   value: {
     fontSize: 16,
@@ -129,17 +139,21 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 10,
     marginBottom: 10,
+    backgroundColor: "#FFFFFF",
   },
   buttonContainer: {
-    marginTop: 10,
+    marginTop: 5,
     alignItems: "center",
   },
   changePasswordBox: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#C3E2FF",
     borderWidth: 1,
     borderColor: "#BDBDBD",
     padding: 10,
     paddingBottom: 20,
+  },
+  changePassTextBox:{
+    backgroundColor: "#FFFFFF"
   },
   button: {
     padding: 10,
