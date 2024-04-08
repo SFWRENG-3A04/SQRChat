@@ -3,98 +3,115 @@ import {
   Modal,
   View,
   Text,
-  FlatList,
   TextInput,
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
 import { ChatContext } from '../context/ChatContext';
+import { ref } from "../services/firebase";
+import { getDatabase, set } from "firebase/database";
+
 
 const CreateChatModal = ({ isVisible, onClose, onChatCreated }) => {
   const { users } = useContext(ChatContext);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [chatName, setChatName] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [chatID, setChatID] = useState('');
+  const [addUsers, setAddUsers] = useState('');
   const [availableUsers, setAvailableUsers] = useState([]);
-  
 
-  const toggleUserSelection = (uid) => {
-    if (selectedUsers.includes(uid)) {
-      setSelectedUsers(selectedUsers.filter((selectedUid) => selectedUid !== uid));
-    } else {
-      setSelectedUsers([...selectedUsers, uid]);
+// Function to close the modal
+const closeModal = () => {
+  setIsModalVisible(false);
+};
+
+  const createNewChat = async (chatPicture,chatId, displayName, participants) => {
+    try {
+       const db = getDatabase();
+       // Use optional chaining and provide a fallback value to prevent calling split on undefined
+       const participantsArray = (participants ?? '').split(',').map(participant => participant.trim());
+   
+       // Construct the participants object with numeric keys
+       const participantsObject = {};
+       participantsArray.forEach((participant, index) => {
+         participantsObject[index] = participant;
+       });
+   
+       const chatData = {
+        pictureUrl:chatPicture,
+         chatId: chatId,
+         displayName: displayName,
+         lastUpdated: new Date().toISOString(), // Use current date for Realtime Database
+         participants: participantsObject, // Store participants as an object with numeric keys
+       };
+   
+       // Add the chat data to the 'chats' collection
+       await set(ref(db, `chats/${chatId}`), chatData);
+   
+       console.log('Chat created successfully');
+       closeModal(); // Close the modal after successful creation
+    } catch (error) {
+       console.error('Error creating new chat:', error);
     }
-  };
+   };
 
   const handleCreateChat = () => {
-    if (selectedUsers.length > 0 && chatName) {
-      onChatCreated(selectedUsers, chatName);
+    if (selectedUsers.length > 0 && chatName && photoUrl && chatID) {
+      // Assuming `selectedUsers` is an array of user IDs
+      // and `addUsers` is a comma-separated string of user IDs
+      const usersArray = addUsers.split(',').map(uid => uid.trim());
+      onChatCreated(photoUrl, chatID, chatName, usersArray); // Passes the correctly ordered parameters
       setChatName('');
+      setPhotoUrl('');
+      setChatID('');
       setSelectedUsers([]);
       onClose();
     } else {
-      alert('Please select users and enter a chat name.');
+      alert('Please fill all fields and select users.');
     }
   };
+ 
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() => toggleUserSelection(item.uid)}
-      style={styles.userItem}
-    >
-      <View style={styles.userInfo}>
-        {item.photoUrl ? (
-          <Image
-            source={{ uri: item.photoUrl }}
-            style={styles.profileImage}
-          />
-        ) : (
-          <Image
-            source={require("../assets/employeeImage.png")} // Replace with your default image path
-            style={styles.profileImage}
-          />
-        )}
-        <Text>
-          {item.displayName ? `${item.displayName} (${item.email})` : item.email}
-        </Text>
-      </View>
-      {selectedUsers.includes(item.uid) && (
-        <MaterialIcons name="check" size={24} color="green" />
-      )}
-    </TouchableOpacity>
-  );
-
-  const filteredUsers = availableUsers.filter(
-    (user) =>
-      (user.displayName &&
-        user.displayName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-
-  return (
+    return (
     <Modal visible={isVisible} animationType="slide" transparent={true}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text style={styles.modalTitle}>Add New Chat</Text>
           <TextInput
-            style={styles.searchInput}
-            placeholder="Search users..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
+            style={styles.input}
+            placeholder="Add Users"
+            placeholderTextColor="#6FBAFF"
+            value={addUsers}
+            onChangeText={setAddUsers}
           />
-          <FlatList
+          {/* <FlatList
             data={filteredUsers}
             renderItem={renderItem}
             keyExtractor={(item) => item.uid.toString()}
+          /> */}
+          <TextInput
+            style={styles.input}
+            placeholder="Photo URL"
+            placeholderTextColor="#6FBAFF" // Adding placeholder text color for better contrast
+            value={photoUrl}
+            onChangeText={setPhotoUrl}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Chat ID"
+            placeholderTextColor="#6FBAFF"
+            value={chatID}
+            onChangeText={setChatID}
           />
           <TextInput
             style={styles.input}
             placeholder="Chat Name"
+            placeholderTextColor="#6FBAFF"
             value={chatName}
             onChangeText={setChatName}
           />
-          <TouchableOpacity style={styles.button} onPress={handleCreateChat}>
+          <TouchableOpacity onPress={() => createNewChat(photoUrl,chatID, chatName, addUsers)} style={styles.button}>
             <Text style={styles.buttonText}>Create Chat</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={onClose}>
@@ -156,7 +173,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#B0B0B0',
     borderRadius: 15,
-    backgroundColor: '#F2F2F2',
+    backgroundColor: '#FFFFFF', // Changed to white for better contrast
     color: 'black',
     fontSize: 16,
   },

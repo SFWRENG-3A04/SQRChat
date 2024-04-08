@@ -7,11 +7,10 @@ import { getDatabase, set } from "firebase/database";
 import { onValue } from "firebase/database";
 import Icon from'../assets/logo.png';
 import Background from '../assets/loginbackground.png';
-import CreateChatModal from "../components/CreateChatModal";
 
-
-export default function SelectMessageScreen({ navigation, users }) {
-  const { dms, groupChats, setSelectedChat } = useContext(ChatContext);
+export default function SelectMessageScreen({ navigation, route, users }) {
+  const [groupChats, setGroupChats] = useState([]);
+  const [dms, setDms] = useState([]);
   const [groupChatsVisible, setGroupChatsVisible] = useState(true);
   const [dmsVisible, setDmsVisible] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -20,62 +19,86 @@ export default function SelectMessageScreen({ navigation, users }) {
  const openModal = () => {
   setIsModalVisible(true);
 };
-
 // Function to close the modal
 const closeModal = () => {
   setIsModalVisible(false);
 };
-
   const currentUserUid = auth.currentUser.uid;
-
+  useEffect(() => {
+    onValue(ref(db, "chats/"), (snapshot) => {
+      if (snapshot.exists()) {
+        chats = snapshot.val();
+        const groupChatsArray = [];
+        const dmsArray = [];
+        for (const chatId in chats) {
+          const chat = chats[chatId];
+          const participants = chat.participants;
+          // Check if current user is a participant in this chat
+          if (participants && participants.includes(currentUserUid)) {
+            // Check if it's a group chat or direct message
+            if (participants.length > 2) {
+              groupChatsArray.push(chat);
+            } else {
+              dmsArray.push(chat);
+            }
+          }
+        }
+        setGroupChats(groupChatsArray);
+        setDms(dmsArray);
+      }
+    });
+  }, []);
   const handleChatSelected = (chat) => {
-    setSelectedChat(chat);
-    navigation.navigate("MessageLogs");
+    navigation.navigate("MessageLogs", { chatDetails: chat });
   };
   const toggleGroupChatsVisibility = () => {
     setGroupChatsVisible(!groupChatsVisible);
  };
-
  const toggleDmsVisibility = () => {
   setDmsVisible(!dmsVisible);
 };
-
-
 const [chatPictureInput, setChatPictureInput] = useState('');
 const [chatIdInput, setChatIdInput] = useState('');
 const [displayNameInput, setDisplayNameInput] = useState('');
 const [participantsInput, setParticipantsInput] = useState('');
-
 
 const createNewChat = async (chatPicture,chatId, displayName, participants) => {
   try {
      const db = getDatabase();
      // Use optional chaining and provide a fallback value to prevent calling split on undefined
      const participantsArray = (participants ?? '').split(',').map(participant => participant.trim());
- 
+
      // Construct the participants object with numeric keys
+  participantsArray.push(currentUserUid);
      const participantsObject = {};
      participantsArray.forEach((participant, index) => {
        participantsObject[index] = participant;
      });
- 
+
      const chatData = {
       pictureUrl:chatPicture,
+      pictureURL:chatPicture,
        chatId: chatId,
        displayName: displayName,
        lastUpdated: new Date().toISOString(), // Use current date for Realtime Database
        participants: participantsObject, // Store participants as an object with numeric keys
+       lastUpdated: new Date().toISOString(),
+       participants: participantsObject,
      };
- 
+
      // Add the chat data to the 'chats' collection
+
      await set(ref(db, `chats/${chatId}`), chatData);
- 
+
      console.log('Chat created successfully');
      closeModal(); // Close the modal after successful creation
+     closeModal();
   } catch (error) {
      console.error('Error creating new chat:', error);
   }
  };
+
+
   return (
     <ImageBackground source={Background} style={styles.Background}>
       <View style={styles.banner}>
@@ -105,11 +128,49 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
             <TouchableOpacity style={styles.NewChatBox} onPress={openModal}>
         <Text style={styles.NewChat}>+ Add Chat</Text>
       </TouchableOpacity>
-      <CreateChatModal
-        isVisible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        onChatCreated={createNewChat}
-      />
+      
+      <Modal visible={isModalVisible} animationType="slide" transparent={true}>
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Add New Chat</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Add Users"
+            placeholderTextColor="#6FBAFF"
+            value={participantsInput}
+            onChangeText={setParticipantsInput}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Photo URL"
+            placeholderTextColor="#6FBAFF" // Adding placeholder text color for better contrast
+            value={chatPictureInput}
+            onChangeText={setChatPictureInput}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Chat ID"
+            placeholderTextColor="#6FBAFF"
+            value={chatIdInput}
+            onChangeText={setChatIdInput}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Chat Name"
+            placeholderTextColor="#6FBAFF"
+            value={displayNameInput}
+            onChangeText={setDisplayNameInput}
+          />
+          <TouchableOpacity onPress={() => createNewChat(chatPictureInput,chatIdInput, displayNameInput, participantsInput)} style={styles.button}>
+            <Text style={styles.buttonText}>Create Chat</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={closeModal}>
+            <Text style={styles.buttonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+
             </View>
           </ScrollView>                   
         )}
@@ -133,11 +194,49 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
             <TouchableOpacity style={styles.NewChatBox} onPress={openModal}>
         <Text style={styles.NewChat}>+ Add Chat</Text>
       </TouchableOpacity>
-      <CreateChatModal
-        isVisible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        onChatCreated={createNewChat}
-      />
+     
+      <Modal visible={isModalVisible} animationType="slide" transparent={true}>
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Add New Chat</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Add Users"
+            placeholderTextColor="#6FBAFF"
+            value={participantsInput}
+            onChangeText={setParticipantsInput}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Photo URL"
+            placeholderTextColor="#6FBAFF" // Adding placeholder text color for better contrast
+            value={chatPictureInput}
+            onChangeText={setChatPictureInput}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Chat ID"
+            placeholderTextColor="#6FBAFF"
+            value={chatIdInput}
+            onChangeText={setChatIdInput}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Chat Name"
+            placeholderTextColor="#6FBAFF"
+            value={displayNameInput}
+            onChangeText={setDisplayNameInput}
+          />
+          <TouchableOpacity onPress={() => createNewChat(chatPictureInput,chatIdInput, displayNameInput, participantsInput)} style={styles.button}>
+            <Text style={styles.buttonText}>Create Chat</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={closeModal}>
+            <Text style={styles.buttonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+      
             </View>
           </ScrollView>
         )}
@@ -317,6 +416,99 @@ closeButton: {
 closeButtonText: {
   color: 'white',
   fontSize: 16,
+  fontWeight: 'bold',
+},
+centeredView: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: 'rgba(0,0,0,0.5)',
+},
+modalView: {
+  width: '80%',
+  backgroundColor: 'white',
+  borderRadius: 15,
+  padding: 20,
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 5,
+},
+modalTitle: {
+  marginBottom: 15,
+  textAlign: 'center',
+  fontSize: 22,
+  fontWeight: 'bold',
+  color: '#0047AB', // A shade of blue from the image
+},
+searchInput: {
+  alignSelf: 'stretch', // Ensure the input stretches to the width of the container
+  marginBottom: 15,
+  paddingHorizontal: 15,
+  paddingVertical: 10,
+  borderWidth: 1,
+  borderColor: '#B0B0B0',
+  borderRadius: 15,
+  backgroundColor: '#F2F2F2',
+  color: 'black',
+  fontSize: 16,
+},
+input: {
+  width: '100%',
+  marginBottom: 15,
+  paddingHorizontal: 15,
+  paddingVertical: 10,
+  borderWidth: 1,
+  borderColor: '#B0B0B0',
+  borderRadius: 15,
+  backgroundColor: '#FFFFFF', // Changed to white for better contrast
+  color: 'black',
+  fontSize: 16,
+},
+userItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#F2F2F2', // Light gray background color for the list item
+  borderRadius: 15,
+  padding: 10,
+  marginVertical: 5,
+},
+userInfo: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: 1,
+},
+profileImage: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  marginRight: 15,
+},
+userText: {
+  color: 'black',
+  fontSize: 16,
+},
+selectionIndicator: {
+ 
+},
+button: {
+  backgroundColor: '#0047AB', // Button color matching the image
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderRadius: 15,
+  marginVertical: 10,
+  elevation: 2,
+  width: '100%', // Full width of the modal content
+  alignItems: 'center',
+},
+buttonText: {
+  color: 'white',
+  fontSize: 18,
   fontWeight: 'bold',
 },
  
