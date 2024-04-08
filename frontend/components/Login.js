@@ -1,5 +1,19 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Button, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, SafeAreaView, Text, Image, Dimensions, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  Button,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  SafeAreaView,
+  Text,
+  Image,
+  Dimensions,
+  TouchableOpacity,
+  Alert, // Import Alert
+} from 'react-native';
 
 export default function Login({ user, uid, db, logIn, signUp }) {
   const [firstName, setFirstName] = useState('');
@@ -10,9 +24,25 @@ export default function Login({ user, uid, db, logIn, signUp }) {
 
   // Function to handle sign up button click
   const handleSignUp = () => {
-    const fullName = `${firstName}${lastName ? ` ${lastName}` : ''}`;
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim()) {
+      // Alert user or handle the error state
+      Alert.alert("Error", "All fields are required.");
+      return; // Stop the sign-up process if any field is empty
+    }
+    
+    const fullName = `${firstName} ${lastName}`;
     signUp(email, password, fullName);
     setIsCreatingAccount(false); // Reset to login mode after sign up
+  };
+
+  // Function for login that also checks for empty fields
+  const handleLogin = () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert("Error", "Email and password are required.");
+      return;
+    }
+
+    logIn(email, password);
   };
 
   return (
@@ -57,16 +87,14 @@ export default function Login({ user, uid, db, logIn, signUp }) {
             <View style={styles.button}>
               <Button
                 title={isCreatingAccount ? 'Sign Up' : 'Login'}
-                onPress={isCreatingAccount ? handleSignUp : () => logIn(email, password)}
+                onPress={isCreatingAccount ? handleSignUp : handleLogin}
               />
             </View>
             <View style={styles.spacing} />
             <View style={styles.createAccountContainer}>
               <Text>{isCreatingAccount ? 'Already have an account? ' : "Don't have an account? "}</Text>
               <TouchableOpacity onPress={() => setIsCreatingAccount(!isCreatingAccount)}>
-                <View style={styles.createAccountText}>
-                  <Text style={styles.createAccountText}>{isCreatingAccount ? 'Login' : 'Create Account'}</Text>
-                </View>
+                <Text style={styles.createAccountText}>{isCreatingAccount ? 'Login' : 'Create Account'}</Text>
               </TouchableOpacity>
             </View>
           </View>
