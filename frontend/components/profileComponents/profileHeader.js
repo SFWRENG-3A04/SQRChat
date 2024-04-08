@@ -7,7 +7,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "fire
 import { getDatabase, ref, set, onValue } from "firebase/database";
 
 
-const ProfileHeader = ({ toggleAvailability, userId }) => {
+const ProfileHeader = ({ toggleAvailability, user }) => {
   const [isAvailable, setIsAvailable] = useState(false);
   const [image, setImage] = useState(null);
   const [tempImage, setTempImage] = useState(null);
@@ -23,8 +23,8 @@ const ProfileHeader = ({ toggleAvailability, userId }) => {
     const newAvailability = !isAvailable;
     setIsAvailable(newAvailability);
 
-    if (userId) {
-      const userAvailabilityRef = ref(database, `users/${userId.uid}/availability`);
+    if (user) {
+      const userAvailabilityRef = ref(database, `users/${user.uid}/availability`);
 
       set(userAvailabilityRef, newAvailability)
         .then(() => {
@@ -38,11 +38,11 @@ const ProfileHeader = ({ toggleAvailability, userId }) => {
   };
 
   useEffect(() => {
-    if (userId) {
-      const imageUrl = userId.photoURL || require('../../assets/employeeImage.png');
+    if (user) {
+      const imageUrl = user.photoURL || require('../../assets/employeeImage.png');
       setImage(imageUrl);
 
-      const userAvailabilityRef = ref(database, `users/${userId.uid}/availability`);
+      const userAvailabilityRef = ref(database, `users/${user.uid}/availability`);
       const unsubscribe = onValue(userAvailabilityRef, (snapshot) => {
         const databaseStatus = snapshot.val();
         setIsAvailable(databaseStatus);
@@ -50,7 +50,7 @@ const ProfileHeader = ({ toggleAvailability, userId }) => {
 
       return () => unsubscribe();
     }
-  }, [userId, database]);
+  }, [user, database]);
 
   const checkCameraPermissions = async () => {
     if (cameraStatus.status !== 'granted') {
@@ -147,11 +147,11 @@ const ProfileHeader = ({ toggleAvailability, userId }) => {
 
 
   const saveProfilePicture = async () => {
-    if (!tempImage || !userId) return; 
+    if (!tempImage || !user) return; 
 
     const storage = getStorage();
   
-    const imageRef = storageRef(storage, `profilePictures/${userId.uid}/${Date.now()}`);
+    const imageRef = storageRef(storage, `profilePictures/${user.uid}/${Date.now()}`);
     const response = await fetch(tempImage);
     const blob = await response.blob();
 
@@ -159,7 +159,7 @@ const ProfileHeader = ({ toggleAvailability, userId }) => {
         await uploadBytes(imageRef, blob);
         const downloadURL = await getDownloadURL(imageRef);
 
-        await updateProfile(userId, {
+        await updateProfile(user, {
             displayName: "Jane Q. User",
             photoURL: downloadURL
         });
