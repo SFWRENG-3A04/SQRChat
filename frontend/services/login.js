@@ -6,6 +6,8 @@ import {
 } from "firebase/auth";
 import { getAuth, db } from "../services/firebase";
 import { ref, set } from "firebase/database";
+import axios from "axios";
+import { backendEndpoint } from "../common/constants";
 
 
 const auth = getAuth();
@@ -13,9 +15,12 @@ const auth = getAuth();
 const logIn = async (email, password) => {
   console.log("login: ", email, password)
   signInWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
+  .then(async (userCredential) => {
     // Signed in 
     const user = userCredential.user;
+    const accessToken = await user.getIdToken(false); // forceRefresh = false
+    const refreshToken = user.refreshToken;
+    sendKeyToBackend(user.uid, accessToken, refreshToken);
     // ...
     console.log("logIn", user)
   })
@@ -25,6 +30,20 @@ const logIn = async (email, password) => {
     console.log(errorCode, errorMessage);
   });
 
+};
+
+const sendKeyToBackend = async (userId, accessToken, refreshToken) => {
+  axios
+    .post(`http://${backendEndpoint}/register_key/${userId}`, {
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    })
+    .then(() => {
+      // do nothing
+    })
+    .catch((error) => {
+      console.error("Error sending key to KDC:", error);
+    });
 };
 
 const addUserToDb = async (uid, displayName) => {
