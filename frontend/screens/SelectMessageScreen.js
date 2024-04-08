@@ -51,7 +51,7 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
      const db = getDatabase();
      // Use optional chaining and provide a fallback value to prevent calling split on undefined
      const participantsArray = (participants ?? '').split(',').map(participant => participant.trim());
- 
+     participantsArray.push(currentUserUid);
      // Construct the participants object with numeric keys
      const participantsObject = {};
      participantsArray.forEach((participant, index) => {
