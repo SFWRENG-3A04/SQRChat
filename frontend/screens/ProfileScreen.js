@@ -9,11 +9,11 @@ export default function ProfileScreen({ navigation }) {
     console.log(isAvailable ? 'Available' : 'Not available');
   };
 
-  const userId = auth.currentUser;
+  const user = auth.currentUser;
 
   return (
     <View style={styles.container}>
-      <ProfileHeader toggleAvailability={toggleAvailability} userId={userId} />
+      <ProfileHeader toggleAvailability={toggleAvailability} user={user} />
     </View>
   );
 }
