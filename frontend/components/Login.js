@@ -1,34 +1,45 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Button, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, SafeAreaView } from 'react-native';
-
+import { StyleSheet, View, TextInput, Button, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, SafeAreaView, Text, Image, Dimensions, TouchableOpacity } from 'react-native';
 
 export default function Login({ user, uid, db, logIn, signUp }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
-  // KeyboardAvoidingView pushes the screen up when you open the keyboard
-  // TouchableWithoutFeedback lets you click anywhere off the screen to bring keyboard back down
+  // Function to handle sign up button click
+  const handleSignUp = () => {
+    const fullName = `${firstName}${lastName ? ` ${lastName}` : ''}`;
+    signUp(email, password, fullName);
+    setIsCreatingAccount(false); // Reset to login mode after sign up
+  };
+
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <KeyboardAvoidingView behavior="height" style={{flex: 1}}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior="height" style={{ flex: 1 }}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View style={styles.container}>
-            <TextInput
-              style={styles.input}
-              onChangeText={setFirstName}
-              value={firstName}
-              placeholder="First Name"
-              keyboardType="default"
-            />
-            <TextInput
-              style={styles.input}
-              onChangeText={setLastName}
-              value={lastName}
-              placeholder="Last Name"
-              keyboardType="default"
-            />
+            <Text style={styles.title}>SQRChat</Text>
+            <Image source={require("../assets/logo.png")} style={styles.image} />
+            {isCreatingAccount && (
+              <>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={setFirstName}
+                  value={firstName}
+                  placeholder="First Name"
+                  keyboardType="default"
+                />
+                <TextInput
+                  style={styles.input}
+                  onChangeText={setLastName}
+                  value={lastName}
+                  placeholder="Last Name"
+                  keyboardType="default"
+                />
+              </>
+            )}
             <TextInput
               style={styles.input}
               onChangeText={setEmail}
@@ -41,10 +52,23 @@ export default function Login({ user, uid, db, logIn, signUp }) {
               onChangeText={setPassword}
               value={password}
               placeholder="Password"
-              secureTextEntry={true} // This will obscure the text for password input
+              secureTextEntry={true}
             />
-            <Button title={'Create Account'} onPress={() => signUp(email, password, `${firstName}${lastName ? ` ${lastName}` : ''}`)} />
-            <Button title={'Login'} onPress={() => logIn(email, password)} />
+            <View style={styles.button}>
+              <Button
+                title={isCreatingAccount ? 'Sign Up' : 'Login'}
+                onPress={isCreatingAccount ? handleSignUp : () => logIn(email, password)}
+              />
+            </View>
+            <View style={styles.spacing} />
+            <View style={styles.createAccountContainer}>
+              <Text>{isCreatingAccount ? 'Already have an account? ' : "Don't have an account? "}</Text>
+              <TouchableOpacity onPress={() => setIsCreatingAccount(!isCreatingAccount)}>
+                <View style={styles.createAccountText}>
+                  <Text style={styles.createAccountText}>{isCreatingAccount ? 'Login' : 'Create Account'}</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
@@ -52,19 +76,49 @@ export default function Login({ user, uid, db, logIn, signUp }) {
   );
 }
 
+const windowWidth = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#C3E2FF',
     alignItems: 'center',
     justifyContent: 'center',
+    width: windowWidth,
   },
   input: {
     height: 40,
     margin: 12,
     borderWidth: 1,
     padding: 10,
-    width: 300, // Adjust the width as necessary
-    borderRadius: 5, // Optional: to make it look nicer
+    width: 300,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  image: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
+  },
+  spacing: {
+    height: 10,
+  },
+  button: {
+    width: 300,
+  },
+  createAccountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 0,
+    backgroundColor: 'transparent',
+  },
+  createAccountText: {
+    color: 'blue',
+    textDecorationLine: 'underline',
   },
 });
