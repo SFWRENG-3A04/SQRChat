@@ -77,8 +77,7 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
 
      const chatData = {
       pictureUrl:chatPicture,
-      pictureURL:chatPicture,
-       chatId: chatId,
+      chatId: chatId,
        displayName: displayName,
        lastUpdated: new Date().toISOString(), // Use current date for Realtime Database
        participants: participantsObject, // Store participants as an object with numeric keys
