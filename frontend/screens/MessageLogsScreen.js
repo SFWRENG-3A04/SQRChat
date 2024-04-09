@@ -69,6 +69,7 @@ export default function MessageLogsScreen({ route }) {
         senderUid: currentUserUid,
         text: messageText.trim(),
         chatId: selectedChat.chatId,
+        type: "textMessage",
       };
 
       socketInstance.emit("sendMessage", socketMessage);
@@ -145,18 +146,64 @@ export default function MessageLogsScreen({ route }) {
 
     socket.on("message", (message) => {
       console.log("Received message:", message);
-      syncedMessage = {
-        senderUid: message.senderUid,
-        text: message.text,
-      };
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
+      if (message.type === "textMessage") {
+        syncedMessage = {
           senderUid: message.senderUid,
           text: message.text,
-        },
-      ]);
-      scrollViewRef.current.scrollToEnd({ animated: true });
+        };
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            senderUid: message.senderUid,
+            text: message.text,
+          },
+        ]);
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      } else if (message.type === "unsendMessage") {
+        const indexToRemove = message.selectedMessageIndex;
+        setMessages((prevMessages) =>
+          prevMessages.filter((_, index) => index !== indexToRemove)
+        );
+      } else if (message.type === "reactToMessage") {
+        const selectedMessageIndex = message.selectedMessageIndex;
+        const reaction = message.reaction;
+
+        const updatedReactions =
+          messages[selectedMessageIndex]?.reactions || {};
+
+        if (
+          updatedReactions[reaction] &&
+          updatedReactions[reaction].includes(currentUserUid)
+        ) {
+          updatedReactions[reaction] = updatedReactions[reaction].filter(
+            (uid) => uid !== currentUserUid
+          );
+          if (updatedReactions[reaction].length === 0) {
+            delete updatedReactions[reaction];
+          }
+        } else {
+          updatedReactions[reaction] = [currentUserUid];
+        }
+
+        setMessages((prevMessages) =>
+          prevMessages.map((msg, index) => {
+            if (index === selectedMessageIndex) {
+              const existingReactions = msg.reactions || {}; // Existing reactions of the selected message
+              const mergedReactions = {
+                ...existingReactions, // Copy existing reactions
+                ...updatedReactions, // Merge with updated reactions
+              };
+              return {
+                ...msg,
+                reactions: mergedReactions || {}, // Set reactions to the merged reactions
+              };
+            }
+            return msg;
+          })
+        );
+      } else {
+        console.log("Not a message type");
+      }
     });
 
     setSocketInstance(socket);
@@ -187,6 +234,8 @@ export default function MessageLogsScreen({ route }) {
           users={users}
           messages={messages}
           currentUserUid={currentUserUid}
+          setMessages={setMessages}
+          socket={socketInstance}
         />
       </ScrollView>
       <View style={styles.inputContainer}>
