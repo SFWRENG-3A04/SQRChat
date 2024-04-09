@@ -16,6 +16,8 @@ import { db, ref, auth } from "../services/firebase";
 import { update } from "firebase/database";
 import { backendEndpoint } from "../common/constants";
 import { ChatContext } from "../context/ChatContext";
+import { encryptMessage, decryptMessage } from "../services/encryption";
+
 
 export default function MessageLogsScreen({ route }) {
   const { users } = route.params;
@@ -24,6 +26,7 @@ export default function MessageLogsScreen({ route }) {
 
   const [socketInstance, setSocketInstance] = useState(null);
   const [messageText, setMessageText] = useState("");
+  const [sessionKey, setSessionKey] = useState(Math.floor(Math.random() * 100) + 1);
 
   const scrollViewRef = useRef();
 
@@ -57,26 +60,32 @@ export default function MessageLogsScreen({ route }) {
   };
 
   const handleMessageSend = () => {
-    if (messageText.trim()) {
+    console.log("HERE lol")
+    const trimmedMessage = messageText.trim()
+    if (trimmedMessage) {
+      console.log("HERE lol 2", currentUserUid, trimmedMessage, selectedChat.chatId, sessionKey)
       const socketMessage = {
         senderUid: currentUserUid,
-        text: messageText.trim(),
+        text: encryptMessage(trimmedMessage, sessionKey),
         chatId: selectedChat.chatId,
       };
+      console.log("HERE lol 3")
 
       socketInstance.emit("sendMessage", socketMessage);
-
+      console.log("HERE", socketMessage)
       const newMessage = {
         senderUid: currentUserUid,
-        text: messageText.trim(),
+        text: trimmedMessage,
       };
+
+      console.log("THERE", newMessage, selectedChat.messages, selectedChat)
 
       const updatedChat = {
         ...selectedChat,
         messages: [...selectedChat.messages, newMessage],
         lastUpdated: Date.now(), // Update lastUpdated timestamp
       };
-
+      
       update(ref(db, `chats/${selectedChat.chatId}`), updatedChat);
       setMessageText("");
       scrollViewRef.current.scrollToEnd({ animated: true });
@@ -88,12 +97,18 @@ export default function MessageLogsScreen({ route }) {
 
     socket.on("connect", () => {
       console.log("Socket connected");
-      socket.emit("joinRoom", selectedChat.chatId);
+      const chatid = selectedChat.chatId;
+      socket.emit("joinRoom", { "userId": currentUserUid, "room": chatid });
     });
 
     socket.on("message", (message) => {
       console.log("Received message:", message);
       scrollViewRef.current.scrollToEnd({ animated: true });
+    });
+
+    socket.on('sessionKey', (data) => {
+      console.log('Received session key:', data.key);
+      setSessionKey(data.key);
     });
 
     setSocketInstance(socket);
@@ -122,7 +137,7 @@ export default function MessageLogsScreen({ route }) {
       >
         <Messages
           users={users}
-          messages={selectedChat.messages}
+          messages={selectedChat.messages || []}
           currentUserUid={currentUserUid}
         />
       </ScrollView>
