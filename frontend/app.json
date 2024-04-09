@@ -41,9 +41,6 @@
           "photosPermission": "Allow $(PRODUCT_NAME) to access your gallery"
         }
       ]
-    ],
-    "extra": {
-      "backendEndpoint": "100.69.247.33"
-    }
+    ]
   }
 }
