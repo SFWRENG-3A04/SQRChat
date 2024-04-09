@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,19 +7,14 @@ import {
   Animated,
   Dimensions,
   Modal,
-} from "react-native";
-import Reactions from "./Reactions";
-import { ChatContext } from "../context/ChatContext";
-import { update } from "firebase/database";
-import { db, ref } from "../services/firebase";
+} from 'react-native';
+import Reactions from './Reactions';
 
 export default function Messages({ messages, currentUserUid, users }) {
-  const { selectedChat } = useContext(ChatContext);
-
   const [isReactionsVisible, setIsReactionsVisible] = useState(false);
   const [reactionPos, setReactionPos] = useState({ x: 0, y: 0 });
   const [selectedMessageIndex, setSelectedMessageIndex] = useState(null);
-  const messageRefs = useRef([]);
+  const messageRefs = useRef({}).current;
   const [scaleAnimations, setScaleAnimations] = useState([]);
 
   useEffect(() => {
@@ -29,8 +24,8 @@ export default function Messages({ messages, currentUserUid, users }) {
   }, [messages]);
 
   const getSenderName = (uid) => {
-    const user = users.find((user) => user.uid === uid);
-    return user && user.displayName ? user.displayName : "Unknown";
+    const user = users.find(user => user.uid === uid);
+    return user && user.displayName ? user.displayName : 'Unknown';
   };
 
   const animateBubble = (index, toValue) => {
@@ -43,95 +38,31 @@ export default function Messages({ messages, currentUserUid, users }) {
 
   const handleLongPress = (index) => {
     setSelectedMessageIndex(index);
-    animateBubble(index, 1.1);
-    if (messageRefs.current[index]) {
-      messageRefs.current[index].measure((fx, fy, width, height, px, py) => {
-        const isCurrentUser = messages[index].senderUid === currentUserUid;
-        const xPosition = isCurrentUser
-          ? Dimensions.get("window").width - 300
-          : 10;
-        setReactionPos({
-          x: xPosition,
-          y: py + height,
-        });
-        setIsReactionsVisible(true);
+    animateBubble(index, 1.1); // Slightly enlarges the bubble
+    messageRefs[index].current.measure((fx, fy, width, height, px, py) => {
+      const isCurrentUser = messages[index].senderUid === currentUserUid;
+      const xPosition = isCurrentUser ? Dimensions.get('window').width - 300 : 10;
+      setReactionPos({
+        x: xPosition,
+        y: py - 50,
       });
-    }
+      setIsReactionsVisible(true);
+    });
   };
 
   useEffect(() => {
     if (!isReactionsVisible && selectedMessageIndex !== null) {
-      animateBubble(selectedMessageIndex, 1);
+      animateBubble(selectedMessageIndex, 1); // Reset to original size when modal is hidden
     }
   }, [isReactionsVisible]);
 
   const handleSelectReaction = (reaction) => {
-    console.log(selectedChat);
-    const updatedReactions = {
-      ...selectedChat.messages[selectedMessageIndex].reactions,
-    };
-
-    if (
-      updatedReactions[reaction] &&
-      updatedReactions[reaction].includes(currentUserUid)
-    ) {
-      updatedReactions[reaction] = updatedReactions[reaction].filter(
-        (uid) => uid !== currentUserUid
-      );
-      if (updatedReactions[reaction].length === 0) {
-        delete updatedReactions[reaction];
-      }
-    } else {
-      updatedReactions[reaction] = [];
-      updatedReactions[reaction].push(currentUserUid);
-    }
-
-    const updatedChat = {
-      ...selectedChat,
-      messages: selectedChat.messages.map((message, index) => {
-        if (index === selectedMessageIndex) {
-          return {
-            ...message,
-            reactions: { ...updatedReactions },
-          };
-        }
-        return message;
-      }),
-    };
-
-    update(ref(db, `chats/${selectedChat.chatId}`), updatedChat)
-      .then(() => {
-        console.log(
-          `React to message ${selectedMessageIndex} with ${reaction}`
-        );
-      })
-      .catch((error) => {
-        console.error("Error updating chat details:", error);
-      });
-
+    console.log(`Selected reaction ${reaction} for message index ${selectedMessageIndex}`);
     setIsReactionsVisible(false);
   };
 
   const handleUnsend = () => {
-    if (selectedMessageIndex !== null) {
-      const updatedMessages = [...selectedChat.messages];
-      updatedMessages.splice(selectedMessageIndex, 1);
-
-      const updatedChat = {
-        ...selectedChat,
-        messages: updatedMessages,
-      };
-
-      update(ref(db, `chats/${selectedChat.chatId}`), updatedChat)
-        .then(() => {
-          console.log(
-            `Unsent a message ${selectedMessageIndex} in ${selectedChat.chatId}`
-          );
-        })
-        .catch((error) => {
-          console.error("Error updating chat details:", error);
-        });
-    }
+    console.log(`Unsend message index ${selectedMessageIndex}`);
     setIsReactionsVisible(false);
   };
 
@@ -141,59 +72,25 @@ export default function Messages({ messages, currentUserUid, users }) {
 
   return (
     <View>
-      <Text style={styles.startOfChat}>Start of chat</Text>
-      {messages &&
-        messages.map((message, index) => (
-          <TouchableWithoutFeedback
-            key={index}
-            onLongPress={() => handleLongPress(index)}
-          >
-            <View
-              ref={(ref) => (messageRefs.current[index] = ref)}
-              style={styles.messageContainer}
+      {messages && messages.map((message, index) => (
+        <TouchableWithoutFeedback
+          key={index}
+          onLongPress={() => handleLongPress(index)}
+        >
+          <View ref={messageRefs[index]} style={styles.messageContainer}>
+            <Animated.View
+              style={[
+                styles.messageBubble,
+                { transform: [{ scale: scaleAnimations[index] ? scaleAnimations[index] : 1 }] }, // if smt breaks, prob this line
+                message.senderUid === currentUserUid ? styles.rightBubble : styles.leftBubble,
+              ]}
             >
-              <Animated.View
-                style={[
-                  styles.messageBubble,
-                  {
-                    transform: [
-                      {
-                        scale: scaleAnimations[index]
-                          ? scaleAnimations[index]
-                          : 1,
-                      },
-                    ],
-                  },
-                  message.senderUid === currentUserUid
-                    ? styles.rightBubble
-                    : styles.leftBubble,
-                ]}
-              >
-                <Text style={styles.senderName}>
-                  {getSenderName(message.senderUid)}
-                </Text>
-                <Text style={styles.messageText}>{message.text}</Text>
-                <View style={{ flexDirection: "row" }}>
-                  {message.reactions &&
-                    Object.entries(message.reactions).map(
-                      ([reaction, users]) => (
-                        <TouchableWithoutFeedback
-                          key={reaction}
-                          onPress={() => handleSelectReaction(reaction)}
-                        >
-                          <View style={styles.reactionContainer}>
-                            <Text
-                              style={styles.reactionText}
-                            >{`${reaction} ${users.length}`}</Text>
-                          </View>
-                        </TouchableWithoutFeedback>
-                      )
-                    )}
-                </View>
-              </Animated.View>
-            </View>
-          </TouchableWithoutFeedback>
-        ))}
+              <Text style={styles.senderName}>{getSenderName(message.senderUid)}</Text>
+              <Text style={styles.messageText}>{message.text}</Text>
+            </Animated.View>
+          </View>
+        </TouchableWithoutFeedback>
+      ))}
       <Modal
         transparent={true}
         visible={isReactionsVisible}
@@ -202,20 +99,8 @@ export default function Messages({ messages, currentUserUid, users }) {
       >
         <TouchableWithoutFeedback onPress={dismissReactions}>
           <View style={styles.fullScreenOverlay}>
-            <View
-              style={[
-                styles.reactionsContainer,
-                { top: reactionPos.y - 115, left: reactionPos.x },
-              ]}
-            >
-              <Reactions
-                onSelect={handleSelectReaction}
-                onUnsend={handleUnsend}
-                isOwner={
-                  messages[selectedMessageIndex] &&
-                  messages[selectedMessageIndex].senderUid === currentUserUid
-                }
-              />
+            <View style={[styles.reactionsContainer, { top: reactionPos.y, left: reactionPos.x }]}>
+              <Reactions onSelect={handleSelectReaction} onUnsend={handleUnsend} />
             </View>
           </View>
         </TouchableWithoutFeedback>
@@ -229,52 +114,34 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   messageBubble: {
-    padding: 8,
+    padding: 10,
     borderRadius: 20,
     marginVertical: 4,
-    maxWidth: "80%",
+    maxWidth: '80%',
   },
   rightBubble: {
-    backgroundColor: "#007bff",
-    alignSelf: "flex-end",
+    backgroundColor: '#007bff',
+    alignSelf: 'flex-end',
     marginRight: 10,
   },
   leftBubble: {
-    backgroundColor: "#e5e5ea",
-    alignSelf: "flex-start",
+    backgroundColor: '#e5e5ea',
+    alignSelf: 'flex-start',
     marginLeft: 10,
   },
   senderName: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 2,
   },
   messageText: {
-    color: "black",
-    marginBottom: 5,
+    color: 'black',
   },
   fullScreenOverlay: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
   reactionsContainer: {
-    position: "absolute",
-  },
-  reactionContainer: {
-    backgroundColor: "gainsboro", // Background color for the emote
-    width: 45,
-    borderRadius: 20, // Border radius to make it oval
-    padding: 5,
-    marginBottom: 5, // Margin between emotes
-    marginRight: 5,
-  },
-  reactionText: {
-    fontSize: 14, // Adjust text size as needed
-  },
-  startOfChat: {
-    textAlign: "center",
-    marginTop: 10,
-    marginBottom: 10,
-    color: "#708090",
+    position: 'absolute',
   },
 });
