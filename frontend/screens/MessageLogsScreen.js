@@ -207,7 +207,9 @@ export default function MessageLogsScreen({ route }) {
           updatedReactions[reaction] = updatedReactions[reaction].filter(
             (uid) => uid !== currentUserUid
           );
-          if (updatedReactions[reaction].length === 0) {
+          console.log("AHHHH", updatedReactions, updatedReactions.hasOwnProperty(reaction), updatedReactions[reaction].length)
+          if (updatedReactions && updatedReactions.hasOwnProperty(reaction) && updatedReactions[reaction].length === 0) {
+            console.log("DELETTTINGGGGGGG", reaction)
             delete updatedReactions[reaction];
           }
         } else if (updatedReactions[reaction]) {
@@ -215,18 +217,21 @@ export default function MessageLogsScreen({ route }) {
         } else {
           updatedReactions[reaction] = [currentUserUid];
         }
-
+        console.log("hehe",selectedMessageIndex)
         setMessages((prevMessages) =>
           prevMessages.map((msg, index) => {
             if (index === selectedMessageIndex) {
-              const existingReactions = msg.reactions || {}; // Existing reactions of the selected message
-              const mergedReactions = {
-                ...existingReactions, // Copy existing reactions
-                ...updatedReactions, // Merge with updated reactions
-              };
+              
+              // const existingReactions = msg.reactions || {}; // Existing reactions of the selected message
+              console.log("updatedReactions", updatedReactions)
+              // console.log("existingReactions", existingReactions)
+              // const mergedReactions = {
+              //   // ...existingReactions, // Copy existing reactions
+              //   ...updatedReactions, // Merge with updated reactions
+              // };
               return {
                 ...msg,
-                reactions: mergedReactions || {}, // Set reactions to the merged reactions
+                reactions: updatedReactions || {}, // Set reactions to the merged reactions
               };
             }
             return msg;
