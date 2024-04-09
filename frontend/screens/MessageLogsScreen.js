@@ -49,6 +49,13 @@ export default function MessageLogsScreen({ route }) {
   }, []);
 
   useEffect(() => {
+    const chatTitle = selectedChat.displayName || "Private Chat";
+    navigation.setOptions({
+      title: chatTitle,
+    });
+  }, [selectedChat, navigation]);
+
+  useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       _keyboardDidShow
