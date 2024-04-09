@@ -1,5 +1,4 @@
-// Adjustments within MessageLogsScreen component
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -9,27 +8,60 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from "react-native";
 import Messages from "../components/Messages";
 import { io } from "socket.io-client";
 import { db, ref, auth } from "../services/firebase";
 import { update } from "firebase/database";
 import { backendEndpoint } from "../common/constants";
+import { ChatContext } from "../context/ChatContext";
 
 export default function MessageLogsScreen({ route }) {
-  const { chatDetails, users } = route.params;
+  const { users } = route.params;
+  const { selectedChat } = useContext(ChatContext);
   const currentUserUid = auth.currentUser.uid;
 
   const [socketInstance, setSocketInstance] = useState(null);
-  const [messages, setMessages] = useState(chatDetails.messages);
   const [messageText, setMessageText] = useState("");
+
+  const scrollViewRef = useRef();
+
+  const scrollDown = (time) => {
+    const timer = setTimeout(() => {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }, time);
+
+    return () => clearTimeout(timer);
+  };
+
+  useEffect(() => {
+    scrollDown(200);
+  }, []);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      _keyboardDidShow
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  const _keyboardDidShow = () => {
+    console.log("Keyboard shown");
+    // Run any additional code here when the keyboard comes up
+    scrollDown(0);
+  };
 
   const handleMessageSend = () => {
     if (messageText.trim()) {
       const socketMessage = {
         senderUid: currentUserUid,
         text: messageText.trim(),
-        chatId: chatDetails.chatId,
+        chatId: selectedChat.chatId,
       };
 
       socketInstance.emit("sendMessage", socketMessage);
@@ -40,13 +72,14 @@ export default function MessageLogsScreen({ route }) {
       };
 
       const updatedChat = {
-        ...chatDetails,
-        messages: [...chatDetails.messages, newMessage],
+        ...selectedChat,
+        messages: [...(selectedChat.messages || []), newMessage],
         lastUpdated: Date.now(), // Update lastUpdated timestamp
       };
 
-      update(ref(db, `chats/${chatDetails.chatId}`), updatedChat);
+      update(ref(db, `chats/${selectedChat.chatId}`), updatedChat);
       setMessageText("");
+      scrollViewRef.current.scrollToEnd({ animated: true });
     }
   };
 
@@ -55,12 +88,12 @@ export default function MessageLogsScreen({ route }) {
 
     socket.on("connect", () => {
       console.log("Socket connected");
-      socket.emit("joinRoom", chatDetails.chatId);
+      socket.emit("joinRoom", selectedChat.chatId);
     });
 
     socket.on("message", (message) => {
       console.log("Received message:", message);
-      setMessages((prevMessages) => [...prevMessages, message]);
+      scrollViewRef.current.scrollToEnd({ animated: true });
     });
 
     setSocketInstance(socket);
@@ -72,7 +105,7 @@ export default function MessageLogsScreen({ route }) {
     return function cleanup() {
       socket.disconnect();
     };
-  }, [chatDetails.chatId]);
+  }, [selectedChat.chatId]);
 
   return (
     <KeyboardAvoidingView
@@ -80,10 +113,16 @@ export default function MessageLogsScreen({ route }) {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 135 : 0}
     >
-      <ScrollView style={styles.messageContainer}>
+      <ScrollView
+        style={styles.messageContainer}
+        ref={scrollViewRef}
+        onContentSizeChange={() =>
+          scrollViewRef.current.scrollToEnd({ animated: true })
+        }
+      >
         <Messages
           users={users}
-          messages={messages}
+          messages={selectedChat.messages || []}
           currentUserUid={currentUserUid}
         />
       </ScrollView>
@@ -108,7 +147,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   messageContainer: {
-    // might need flex here
+    flexGrow: 1,
   },
   inputContainer: {
     flexDirection: "row",
