@@ -129,7 +129,7 @@ const ProfileHeader = ({ toggleAvailability, user }) => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.5,
     });
 
     if (!result.cancelled && result.assets && result.assets.length > 0) {
