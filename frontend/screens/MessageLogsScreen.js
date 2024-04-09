@@ -19,27 +19,7 @@ import { backendEndpoint } from "../common/constants";
 import { ChatContext } from "../context/ChatContext";
 import { getDatabase, remove } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
-// import { encryptMessage, decryptMessage } from "../services/encryption";
-
-const encrypt = (message, secretKey) => {
-  return secretKey + message;
-};
-
-const decrypt = (encryptedMessage, secretKey) => {
-  return encryptedMessage.replace(secretKey, "");
-};
-
-const encryptMessage = (message, secretKey) => {
-  const encrypted = encrypt(message, secretKey);
-  console.log("encrypted message", encrypted, secretKey);
-  return encrypted; //.toString();
-};
-
-const decryptMessage = (encryptedMessage, secretKey) => {
-  const decrypted = decrypt(encryptedMessage, secretKey);
-  console.log("decrypted message", decrypted, secretKey);
-  return decrypted; //.toString(Utf8);
-};
+import { encryptMessage, decryptMessage } from "../services/encryption";
 
 export default function MessageLogsScreen({ route }) {
   const { users } = route.params;
@@ -66,7 +46,7 @@ export default function MessageLogsScreen({ route }) {
   };
 
   useEffect(() => {
-    setMessages(selectedChat.messages);
+    // setMessages(selectedChat.messages);
     scrollDown(200);
   }, []);
 
@@ -240,10 +220,8 @@ export default function MessageLogsScreen({ route }) {
     });
 
     socket.on("sessionKey", (data) => {
-      console.log("before", sessionKey);
       console.log("Received session key:", data.key);
       setSessionKey(data.key);
-      console.log("after", sessionKey);
     });
 
     setSocketInstance(socket);
@@ -352,7 +330,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#6FBAFF",
     padding: 10,
     borderRadius: 5,
-    marginBottom: 10,
+    marginBottom: 0,
   },
   optionsButtonText: {
     color: "#fff",
