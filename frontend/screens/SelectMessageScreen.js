@@ -76,131 +76,114 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
   }
  };
   return (
+    
     <ImageBackground source={Background} style={styles.Background}>
       <View style={styles.banner}>
          <Image source={Icon} style={styles.Icon}/>
-         </View>
-    <View style={styles.container}>
-    <TouchableOpacity style={styles.titlecontainer} onPress={toggleGroupChatsVisibility}>
- <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-    <Image
-      style={{ width: 30, height: 30, marginRight: 10, marginLeft: 10 }}
-      source={require('../assets/DMs.png')} // Ensure this path is correct
-    />
-    <Text style={styles.title}>Group Chats</Text>
+      </View>
+      <TouchableOpacity style={styles.NewChatBox} onPress={openModal}>
+        <Text style={styles.NewChat}>+ Add Chat</Text>
+      </TouchableOpacity>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.titlecontainer} onPress={toggleGroupChatsVisibility}>
+      
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+      <Image
+        style={{ width: 30, height: 30, marginRight: 10, marginLeft: 10 }}
+        source={require('../assets/DMs.png')} // Ensure this path is correct
+      />
+        <Text style={styles.title}>Group Chats</Text>
     <Image
       style={{ width: 20, height: 20, marginLeft: 55 }}
       source={groupChatsVisible ? require('../assets/chevronDown.png') : require('../assets/chevronUp.png')}
     />
- </View>
-</TouchableOpacity>
-{groupChatsVisible && (
+    </View>
+    </TouchableOpacity>
+      {groupChatsVisible && (
           <ScrollView style={styles.chatcontainer}>
-            
-            <Chat  users={users}
-        groupChats={groupChats}
-        onChatSelected={handleChatSelected} />
+            <Chat users={users}
+            groupChats={groupChats}
+            onChatSelected={handleChatSelected} />
             <View style={styles.NewChatBox}>
-            <TouchableOpacity style={styles.NewChatBox} onPress={openModal}>
-        <Text style={styles.NewChat}>+ Add Chat</Text>
-      </TouchableOpacity>
-      <Modal visible={isModalVisible} onRequestClose={closeModal} animationType="slide">
- <View style={styles.modalContainer}>
-    <Text style={styles.modalTitle}>Add New Chat</Text>
-    <TextInput
-      style={styles.input}
-      placeholder="Chat Picture URL"
-      onChangeText={setChatPictureInput}
-      value={chatPictureInput}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Chat ID"
-      onChangeText={setChatIdInput}
-      value={chatIdInput}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Display Name"
-      onChangeText={setDisplayNameInput}
-      value={displayNameInput}
-    />
+              
+            <Modal visible={isModalVisible} onRequestClose={closeModal} animationType="slide">
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Add New Chat</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Chat Picture URL"
+                onChangeText={setChatPictureInput}
+                value={chatPictureInput}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Chat ID"
+                onChangeText={setChatIdInput}
+                value={chatIdInput}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Display Name"
+                onChangeText={setDisplayNameInput}
+                value={displayNameInput}
+              />
 
-<TextInput
- style={styles.input}
- placeholder="Participants (comma-separated)"
- onChangeText={setParticipantsInput}
- value={participantsInput}
-/>
-
-    <TouchableOpacity onPress={() => createNewChat(chatPictureInput,chatIdInput, displayNameInput, participantsInput)} style={styles.submitButton}>
-      <Text style={styles.submitButtonText}>Submit</Text>
-    </TouchableOpacity>
-    <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-      <Text style={styles.closeButtonText}>Close</Text>
-    </TouchableOpacity>
- </View>
-</Modal>
-            </View>
+          <TouchableOpacity onPress={() => createNewChat(chatPictureInput,chatIdInput, displayNameInput, participantsInput)} style={styles.submitButton}>
+            <Text style={styles.submitButtonText}>Create Chat</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+          </View>
+            </Modal>
+          </View>
           </ScrollView>                   
         )}
-<TouchableOpacity style={styles.titlecontainer} onPress={toggleDmsVisibility}>
- <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-    <Image
-      style={{ width: 30, height: 30, marginRight: 10, marginLeft: 10 }}
-      source={require('../assets/TeamChat.png')} // Ensure this path is correct
+          <TouchableOpacity style={styles.titlecontainer} onPress={toggleDmsVisibility}>
+           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+              <Image
+                style={{ width: 30, height: 30, marginRight: 10, marginLeft: 10 }}
+                source={require('../assets/TeamChat.png')} // Ensure this path is correct
+              />
+              <Text style={styles.title}>DMs</Text>
+              <Image style={{ width: 20, height: 20, marginLeft: '50%' }} source={dmsVisible ? require('../assets/chevronDown.png') : require('../assets/chevronUp.png')}
     />
-    <Text style={styles.title}>DMs</Text>
-    <Image
-      style={{ width: 20, height: 20, marginLeft: '50%' }}
-      source={dmsVisible ? require('../assets/chevronDown.png') : require('../assets/chevronUp.png')}
-    />
- </View>
-</TouchableOpacity>
-{dmsVisible && (
+          </View>
+      </TouchableOpacity>
+        {dmsVisible && (
           <ScrollView style={styles.chatcontainer}>
              <Chat users={users} groupChats={dms} onChatSelected={handleChatSelected} />
             <View style={styles.NewChatBox}>
-            <TouchableOpacity style={styles.NewChatBox} onPress={openModal}>
-        <Text style={styles.NewChat}>+ Add Chat</Text>
-      </TouchableOpacity>
       <Modal visible={isModalVisible} onRequestClose={closeModal} animationType="slide">
- <View style={styles.modalContainer}>
-    <Text style={styles.modalTitle}>Add New Chat</Text>
-    <TextInput
-      style={styles.input}
-      placeholder="Chat Picture URL"
-      onChangeText={setChatPictureInput}
-      value={chatPictureInput}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Chat ID"
-      onChangeText={setChatIdInput}
-      value={chatIdInput}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Display Name"
-      onChangeText={setDisplayNameInput}
-      value={displayNameInput}
-    />
+      <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Add New Chat</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Chat Picture URL"
+            onChangeText={setChatPictureInput}
+            value={chatPictureInput}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Chat ID"
+            onChangeText={setChatIdInput}
+            value={chatIdInput}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Display Name"
+            onChangeText={setDisplayNameInput}
+            value={displayNameInput}
+          />
 
-<TextInput
- style={styles.input}
- placeholder="Participants (comma-separated)"
- onChangeText={setParticipantsInput}
- value={participantsInput}
-/>
-
-    <TouchableOpacity onPress={() => createNewChat(chatPictureInput,chatIdInput, displayNameInput, participantsInput)} style={styles.submitButton}>
-      <Text style={styles.submitButtonText}>Submit</Text>
-    </TouchableOpacity>
-    <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-      <Text style={styles.closeButtonText}>Close</Text>
-    </TouchableOpacity>
- </View>
-</Modal>
+          <TouchableOpacity onPress={() => createNewChat(chatPictureInput,chatIdInput, displayNameInput, participantsInput)} style={styles.submitButton}>
+            <Text style={styles.submitButtonText}>Create Chat</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+      </View>
+    </Modal>
             </View>
           </ScrollView>
         )}
@@ -222,10 +205,10 @@ const createNewChat = async (chatPicture,chatId, displayName, participants) => {
 
 const styles = StyleSheet.create({
   container: {
-   marginTop:'5%',
- marginLeft:'10%',
- marginRight:'10%',
-     width:'80%',
+    marginTop:'5%',
+    marginLeft:'10%',
+    marginRight:'10%',
+    width:'80%',
   },
   chatcontainer: {
      backgroundColor:"white",
@@ -284,69 +267,22 @@ const styles = StyleSheet.create({
     alignItems: 'center', // This will center the Image horizontally
     justifyContent: 'center', // This will center the Image vertically
   },
-  modalContainer: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center', // Center the content vertically
-    width: '80%', // Adjust the width as needed
-    height: '40%', // Adjust the height as needed
- },
- modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
- },
- input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 10,
-    width: '100%',
- },
- submitButton: {
-    backgroundColor: '#6FBAFF',
-    padding: 10,
-    borderRadius: 5,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
- },
- submitButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
- },
- closeButton: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: 'blue',
-    borderRadius: 5,
- },
- closeButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
- },
  modalContainer: {
-  backgroundColor: 'white',
   padding: 20,
   borderRadius: 5,
   alignItems: 'center',
   justifyContent: 'center', // Center the content vertically
-  width: '80%', // Adjust the width as needed
+  width: '100%', // Adjust the width as needed
   height: '40%', // Adjust the height as needed
-  marginTop: '10%', // Adjust the top margin as needed
-  marginBottom: '10%', // Adjust the bottom margin as needed
+  marginTop: 'auto', // Adjust the top margin as needed
+  marginBottom: 'auto', // Adjust the bottom margin as needed
 },
 modalTitle: {
   fontSize: 20,
   fontWeight: 'bold',
   marginBottom: 20,
   textAlign: 'center', // Center the title text
+  color: 'blue',
 },
 input: {
   height: 40,
@@ -355,12 +291,12 @@ input: {
   marginBottom: 10,
   paddingLeft: 10,
   width: '100%',
-  borderRadius: 5, // Add border radius to inputs
+  borderRadius: 10, // Add border radius to inputs
 },
 submitButton: {
   backgroundColor: '#6FBAFF',
   padding: 10,
-  borderRadius: 5,
+  borderRadius: 10,
   width: '100%',
   alignItems: 'center',
   justifyContent: 'center',
@@ -370,17 +306,20 @@ submitButtonText: {
   color: 'white',
   fontSize: 16,
   fontWeight: 'bold',
+  borderRadius: 10,
 },
 closeButton: {
   marginTop: 20,
   padding: 10,
   backgroundColor: 'blue',
-  borderRadius: 5,
+  borderRadius: 10,
+  width: '100%',
 },
 closeButtonText: {
   color: 'white',
   fontSize: 16,
   fontWeight: 'bold',
+  textAlign: 'center',
 },
  
- });
+});
