@@ -19,6 +19,7 @@ import { backendEndpoint } from "../common/constants";
 import { ChatContext } from "../context/ChatContext";
 import { getDatabase, remove } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
+import { encryptMessage, decryptMessage } from "../services/encryption";
 
 export default function MessageLogsScreen({ route }) {
   const { users } = route.params;
@@ -30,6 +31,7 @@ export default function MessageLogsScreen({ route }) {
 
   const [socketInstance, setSocketInstance] = useState(null);
   const [messageText, setMessageText] = useState("");
+  const [sessionKey, setSessionKey] = useState(Math.floor(Math.random() * 100) + 1);
 
   const scrollViewRef = useRef();
 
@@ -58,16 +60,15 @@ export default function MessageLogsScreen({ route }) {
   }, []);
 
   const _keyboardDidShow = () => {
-    console.log("Keyboard shown");
-    // Run any additional code here when the keyboard comes up
     scrollDown(0);
   };
 
   const handleMessageSend = () => {
-    if (messageText.trim()) {
+    const trimmedMessage = messageText.trim()
+    if (trimmedMessage) {
       const socketMessage = {
         senderUid: currentUserUid,
-        text: messageText.trim(),
+        text: encryptMessage(trimmedMessage, sessionKey),
         chatId: selectedChat.chatId,
       };
 
@@ -75,7 +76,7 @@ export default function MessageLogsScreen({ route }) {
 
       const newMessage = {
         senderUid: currentUserUid,
-        text: messageText.trim(),
+        text: trimmedMessage,
       };
 
       const updatedChat = {
@@ -140,23 +141,29 @@ export default function MessageLogsScreen({ route }) {
 
     socket.on("connect", () => {
       console.log("Socket connected");
-      socket.emit("joinRoom", selectedChat.chatId);
+      const chatid = selectedChat.chatId;
+      socket.emit("joinRoom", { "userId": currentUserUid, "room": chatid });
     });
 
     socket.on("message", (message) => {
       console.log("Received message:", message);
       syncedMessage = {
         senderUid: message.senderUid,
-        text: message.text,
+        text: decryptMessage(message.text, sessionKey),
       };
       setMessages((prevMessages) => [
         ...prevMessages,
         {
           senderUid: message.senderUid,
-          text: message.text,
+          text: decryptMessage(message.text, sessionKey),
         },
       ]);
       scrollViewRef.current.scrollToEnd({ animated: true });
+    });
+
+    socket.on('sessionKey', (data) => {
+      console.log('Received session key:', data.key);
+      setSessionKey(data.key);
     });
 
     setSocketInstance(socket);

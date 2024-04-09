@@ -43,10 +43,10 @@ export const ChatProvider = ({ children }) => {
           JSON.stringify(selectedChat) !==
             JSON.stringify(chatsData[selectedChat.chatId]) // Compare current selectedChat with the one in snapshot
         ) {
-          console.log(
-            "Setting New Selected Data",
-            chatsData[selectedChat.chatId]
-          );
+          // console.log(
+          //   "Setting New Selected Data",
+          //   chatsData[selectedChat.chatId]
+          // );
           setSelectedChat(chatsData[selectedChat.chatId]);
         }
       }
