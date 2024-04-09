@@ -22,13 +22,13 @@ const ProfileAuth = ({user}) => {
         setCurrentPassword("");
         setNewPassword("");
       } catch (error) {
-        console.error("Error updating password:", error.message);
+        console.log("Error updating password:", error.message);
         showNotification("Error updating password");
         setCurrentPassword("");
         setNewPassword("");
       }
     } else {
-      console.error("No user is currently signed in");
+      console.log("No user is currently signed in");
     }
     scrollViewRef.current.scrollToEnd({ animated: true });
   }
