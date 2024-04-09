@@ -9,21 +9,26 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
 
  // Function to get user names from their UIDs
  const getUserNames = (participants) => {
-    const filteredParticipants = participants.filter(uid => uid != currentUserUid);
-    return filteredParticipants.map(uid => {
-       const user = getUser(uid);
-       return user ? user.displayName : 'Unknown';
-    }).join(', ');
+  const filteredParticipants = participants.filter(uid => uid !== currentUserUid);
+ 
+  return filteredParticipants
+     .map((uid) => {
+       const user = users.find((user) => user.uid === uid);
+       return user && user.displayName ? user.displayName : "Unknown";
+     })
+     .join(", ");
+
  };
 
- const getUserPhoto = (participants) => {
-    const filteredParticipants = participants.filter(uid => uid != currentUserUid);
-    return filteredParticipants.map(uid => {
-       const user = getUser(uid);
-       return user ? user.photoUrl : 'Unknown';
-    }).join(', ');
- };
+ 
+  const getUserPhoto = (participants, currentUserUid) => {
+   const otherUser = participants.filter(uid => uid !== currentUserUid)[0];
+   const user = users.find((user) => user.uid === otherUser);
+   console.log(user);
+   return user ? user.photoUrl : 'Unknown';
+   };
 
+   
  return (
     <View style={styles.listContainer}>
       {groupChats.map(chat => {
@@ -40,7 +45,7 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
               {chat.participants.length === 2 && (
                 <Image
                  style={styles.chatImageStyle} 
-                 source={{uri: getUserPhoto(chat.participants)}}
+                 source={{uri: getUserPhoto(chat.participants,currentUserUid)}}
                 />
               )}
               {chat.participants.length != 2 && (

@@ -14,11 +14,15 @@ import Messages from "../components/Messages";
 import { io } from "socket.io-client";
 import { db, ref, auth } from "../services/firebase";
 import { update } from "firebase/database";
+import RenameChat from "../components/RenameChat";
 import { backendEndpoint } from "../common/constants";
 import { ChatContext } from "../context/ChatContext";
+import { getDatabase,  remove } from "firebase/database";
+import { useNavigation } from '@react-navigation/native';
 
 export default function MessageLogsScreen({ route }) {
   const { users } = route.params;
+  const navigation = useNavigation();
   const { selectedChat } = useContext(ChatContext);
   const currentUserUid = auth.currentUser.uid;
 
@@ -73,7 +77,7 @@ export default function MessageLogsScreen({ route }) {
 
       const updatedChat = {
         ...selectedChat,
-        messages: [...(selectedChat.messages || []), newMessage],
+        messages: [...selectedChat.messages, newMessage],
         lastUpdated: Date.now(), // Update lastUpdated timestamp
       };
 
@@ -83,6 +87,53 @@ export default function MessageLogsScreen({ route }) {
     }
   };
 
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+ 
+  const toggleDropdown = () => {
+     setDropdownVisible(!dropdownVisible);
+  };
+  const handleOptionSelect = (option) => {
+    console.log(`Selected option: ${option}`);
+
+    setDropdownVisible(false);
+ };
+
+  const handleDeleteChat = () => {
+    const db = getDatabase();
+    const chatId = selectedChat.chatId;
+   
+    const chatRef = ref(db, `chats/${chatId}`);
+  
+    remove(chatRef)
+       .then(() => {
+         console.log('Chat deleted successfully');
+         navigation.goBack();
+  
+       })
+       .catch((error) => {
+         console.error('Error deleting chat:', error);
+       });
+   };
+
+   const handleRenameChat = (newChatName) => {
+    const db = getDatabase();
+    const chatId = selectedChat.chatId;
+  
+    const chatRef = ref(db, `chats/${chatId}`);
+  
+    update(chatRef, { displayName: newChatName })
+       .then(() => {
+         console.log('Chat renamed successfully');
+        
+       })
+       .catch((error) => {
+         console.error('Error renaming chat:', error);
+       });
+       console.log('New chat name:', newChatName);
+      setIsModalVisible(false); 
+   };
+  
   useEffect(() => {
     const socket = io(`http://${backendEndpoint}`);
 
@@ -122,7 +173,7 @@ export default function MessageLogsScreen({ route }) {
       >
         <Messages
           users={users}
-          messages={selectedChat.messages || []}
+          messages={selectedChat.messages}
           currentUserUid={currentUserUid}
         />
       </ScrollView>
@@ -137,6 +188,26 @@ export default function MessageLogsScreen({ route }) {
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>
+
+      <TouchableOpacity style={styles.optionsButton} onPress={toggleDropdown}>
+        <Text style={styles.optionsButtonText}>Options</Text>
+      </TouchableOpacity>
+
+      {dropdownVisible && (
+      <View style={styles.dropdownOptions}>
+          <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+        <Text style={styles.OptionText}>Rename Chat</Text>
+      </TouchableOpacity>
+      <RenameChat
+        isVisible={isModalVisible}
+        onSubmit={handleRenameChat}
+        onCancel={() => setIsModalVisible(false)}
+      />
+          <TouchableOpacity onPress={handleDeleteChat}>
+            <Text style={styles.OptionText}>Delete Chat</Text>
+          </TouchableOpacity>
+      </View>
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -176,4 +247,32 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
   },
+
+  optionsButton: {
+    backgroundColor: '#6FBAFF',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+ },
+ optionsButtonText: {
+    color: '#fff',
+    fontSize: 16,
+ },
+ dropdownOptions: {
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    alignItems:'center',
+ },
+ OptionText: {
+
+    fontSize: 16,
+    marginBottom: 10,
+    color:'#4D4D4D'
+ },
 });
