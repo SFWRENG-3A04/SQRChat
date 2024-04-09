@@ -6,7 +6,7 @@ const encrypt = (message, secretKey) => {
 }
 
 const decrypt = (encryptedMessage, secretKey) => {
-  return encryptedMessage.slice(secretKey.length);
+  return encryptedMessage.replace(secretKey, "")
 }
 
 const encryptMessage = (message, secretKey) => {

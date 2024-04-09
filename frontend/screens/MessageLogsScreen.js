@@ -19,7 +19,27 @@ import { backendEndpoint } from "../common/constants";
 import { ChatContext } from "../context/ChatContext";
 import { getDatabase, remove } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
-import { encryptMessage, decryptMessage } from "../services/encryption";
+// import { encryptMessage, decryptMessage } from "../services/encryption";
+
+const encrypt = (message, secretKey) => {
+  return secretKey + message
+}
+
+const decrypt = (encryptedMessage, secretKey) => {
+  return encryptedMessage.replace(secretKey, "")
+}
+
+const encryptMessage = (message, secretKey) => {
+  const encrypted = encrypt(message, secretKey);
+  console.log("encrypted message", encrypted, secretKey)
+  return encrypted//.toString();
+};
+
+const decryptMessage = (encryptedMessage, secretKey) => {
+  const decrypted = decrypt(encryptedMessage, secretKey);
+  console.log("decrypted message", decrypted, secretKey)
+  return decrypted//.toString(Utf8);
+};
 
 export default function MessageLogsScreen({ route }) {
   const { users } = route.params;
@@ -153,7 +173,7 @@ export default function MessageLogsScreen({ route }) {
     });
 
     socket.on("message", (message) => {
-      console.log("Received message:", message);
+      console.log("Received message:", message, message.text, sessionKey);
       syncedMessage = {
         senderUid: message.senderUid,
         text: decryptMessage(message.text, sessionKey),
@@ -169,8 +189,10 @@ export default function MessageLogsScreen({ route }) {
     });
 
     socket.on('sessionKey', (data) => {
+      console.log("before", sessionKey)
       console.log('Received session key:', data.key);
       setSessionKey(data.key);
+      console.log("after", sessionKey)
     });
 
     setSocketInstance(socket);
@@ -182,7 +204,7 @@ export default function MessageLogsScreen({ route }) {
     return function cleanup() {
       socket.disconnect();
     };
-  }, [selectedChat.chatId]);
+  }, [selectedChat.chatId, sessionKey]);
 
   return (
     <KeyboardAvoidingView

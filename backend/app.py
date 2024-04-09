@@ -102,4 +102,4 @@ def generate_session_key_sha256(access_tokens):
   return session_key
 
 if __name__ == '__main__':
-  socketio.run(app, host='0.0.0.0', port=80, debug=True)
+  socketio.run(app, host='0.0.0.0', port=80, debug=False)
