@@ -73,7 +73,7 @@ export default function MessageLogsScreen({ route }) {
 
       const updatedChat = {
         ...selectedChat,
-        messages: [...selectedChat.messages, newMessage],
+        messages: [...(selectedChat.messages || []), newMessage],
         lastUpdated: Date.now(), // Update lastUpdated timestamp
       };
 
@@ -122,7 +122,7 @@ export default function MessageLogsScreen({ route }) {
       >
         <Messages
           users={users}
-          messages={selectedChat.messages}
+          messages={selectedChat.messages || []}
           currentUserUid={currentUserUid}
         />
       </ScrollView>
