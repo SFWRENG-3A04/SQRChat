@@ -181,6 +181,8 @@ export default function MessageLogsScreen({ route }) {
           if (updatedReactions[reaction].length === 0) {
             delete updatedReactions[reaction];
           }
+        } else if (updatedReactions[reaction]) {
+          updatedReactions[reaction].push(currentUserUid);
         } else {
           updatedReactions[reaction] = [currentUserUid];
         }

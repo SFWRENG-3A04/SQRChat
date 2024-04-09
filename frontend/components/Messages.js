@@ -95,9 +95,10 @@ export default function Messages({
       if (updatedReactions[reaction].length === 0) {
         delete updatedReactions[reaction];
       }
-    } else {
-      updatedReactions[reaction] = [];
+    } else if (updatedReactions[reaction]) {
       updatedReactions[reaction].push(currentUserUid);
+    } else {
+      updatedReactions[reaction] = [currentUserUid];
     }
 
     const updatedChat = {
