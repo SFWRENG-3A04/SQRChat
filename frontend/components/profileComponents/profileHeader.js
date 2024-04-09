@@ -97,7 +97,6 @@ const ProfileHeader = ({ toggleAvailability, user }) => {
     });
 
     if (!result.cancelled && result.assets && result.assets.length > 0) {
-      console.log(result.assets[0].uri);
       setTempImage(result.assets[0].uri);
       uploadBottomSheetRef.current.close();
       setTimeout(() => {
