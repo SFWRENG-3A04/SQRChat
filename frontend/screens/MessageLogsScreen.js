@@ -17,14 +17,16 @@ import { update } from "firebase/database";
 import RenameChat from "../components/RenameChat";
 import { backendEndpoint } from "../common/constants";
 import { ChatContext } from "../context/ChatContext";
-import { getDatabase,  remove } from "firebase/database";
-import { useNavigation } from '@react-navigation/native';
+import { getDatabase, remove } from "firebase/database";
+import { useNavigation } from "@react-navigation/native";
 
 export default function MessageLogsScreen({ route }) {
   const { users } = route.params;
   const navigation = useNavigation();
   const { selectedChat } = useContext(ChatContext);
   const currentUserUid = auth.currentUser.uid;
+
+  const [messages, setMessages] = useState([]);
 
   const [socketInstance, setSocketInstance] = useState(null);
   const [messageText, setMessageText] = useState("");
@@ -40,6 +42,7 @@ export default function MessageLogsScreen({ route }) {
   };
 
   useEffect(() => {
+    setMessages(selectedChat.messages);
     scrollDown(200);
   }, []);
 
@@ -89,51 +92,49 @@ export default function MessageLogsScreen({ route }) {
 
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
- 
+
   const toggleDropdown = () => {
-     setDropdownVisible(!dropdownVisible);
+    setDropdownVisible(!dropdownVisible);
   };
   const handleOptionSelect = (option) => {
     console.log(`Selected option: ${option}`);
 
     setDropdownVisible(false);
- };
+  };
 
   const handleDeleteChat = () => {
     const db = getDatabase();
     const chatId = selectedChat.chatId;
-   
-    const chatRef = ref(db, `chats/${chatId}`);
-  
-    remove(chatRef)
-       .then(() => {
-         console.log('Chat deleted successfully');
-         navigation.goBack();
-  
-       })
-       .catch((error) => {
-         console.error('Error deleting chat:', error);
-       });
-   };
 
-   const handleRenameChat = (newChatName) => {
+    const chatRef = ref(db, `chats/${chatId}`);
+
+    remove(chatRef)
+      .then(() => {
+        console.log("Chat deleted successfully");
+        navigation.goBack();
+      })
+      .catch((error) => {
+        console.error("Error deleting chat:", error);
+      });
+  };
+
+  const handleRenameChat = (newChatName) => {
     const db = getDatabase();
     const chatId = selectedChat.chatId;
-  
+
     const chatRef = ref(db, `chats/${chatId}`);
-  
+
     update(chatRef, { displayName: newChatName })
-       .then(() => {
-         console.log('Chat renamed successfully');
-        
-       })
-       .catch((error) => {
-         console.error('Error renaming chat:', error);
-       });
-       console.log('New chat name:', newChatName);
-      setIsModalVisible(false); 
-   };
-  
+      .then(() => {
+        console.log("Chat renamed successfully");
+      })
+      .catch((error) => {
+        console.error("Error renaming chat:", error);
+      });
+    console.log("New chat name:", newChatName);
+    setIsModalVisible(false);
+  };
+
   useEffect(() => {
     const socket = io(`http://${backendEndpoint}`);
 
@@ -144,6 +145,17 @@ export default function MessageLogsScreen({ route }) {
 
     socket.on("message", (message) => {
       console.log("Received message:", message);
+      syncedMessage = {
+        senderUid: message.senderUid,
+        text: message.text,
+      };
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          senderUid: message.senderUid,
+          text: message.text,
+        },
+      ]);
       scrollViewRef.current.scrollToEnd({ animated: true });
     });
 
@@ -173,7 +185,7 @@ export default function MessageLogsScreen({ route }) {
       >
         <Messages
           users={users}
-          messages={selectedChat.messages || []}
+          messages={messages}
           currentUserUid={currentUserUid}
         />
       </ScrollView>
@@ -194,19 +206,19 @@ export default function MessageLogsScreen({ route }) {
       </TouchableOpacity>
 
       {dropdownVisible && (
-      <View style={styles.dropdownOptions}>
+        <View style={styles.dropdownOptions}>
           <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-        <Text style={styles.OptionText}>Rename Chat</Text>
-      </TouchableOpacity>
-      <RenameChat
-        isVisible={isModalVisible}
-        onSubmit={handleRenameChat}
-        onCancel={() => setIsModalVisible(false)}
-      />
+            <Text style={styles.OptionText}>Rename Chat</Text>
+          </TouchableOpacity>
+          <RenameChat
+            isVisible={isModalVisible}
+            onSubmit={handleRenameChat}
+            onCancel={() => setIsModalVisible(false)}
+          />
           <TouchableOpacity onPress={handleDeleteChat}>
             <Text style={styles.OptionText}>Delete Chat</Text>
           </TouchableOpacity>
-      </View>
+        </View>
       )}
     </KeyboardAvoidingView>
   );
@@ -249,30 +261,29 @@ const styles = StyleSheet.create({
   },
 
   optionsButton: {
-    backgroundColor: '#6FBAFF',
+    backgroundColor: "#6FBAFF",
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,
- },
- optionsButtonText: {
-    color: '#fff',
+  },
+  optionsButtonText: {
+    color: "#fff",
     fontSize: 16,
- },
- dropdownOptions: {
-    backgroundColor: '#fff',
+  },
+  dropdownOptions: {
+    backgroundColor: "#fff",
     borderRadius: 5,
     padding: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    alignItems:'center',
- },
- OptionText: {
-
+    alignItems: "center",
+  },
+  OptionText: {
     fontSize: 16,
     marginBottom: 10,
-    color:'#4D4D4D'
- },
+    color: "#4D4D4D",
+  },
 });
