@@ -27,9 +27,6 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
  return (
     <View style={styles.listContainer}>
       {groupChats.map(chat => {
-        // Correctly placed console.log statement
-        //console.log(chat.pictureURL);
-
         return (
           <TouchableOpacity
             key={chat.chatId}

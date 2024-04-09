@@ -54,31 +54,24 @@ export default function MessageLogsScreen({ route }) {
   }, []);
 
   const _keyboardDidShow = () => {
-    console.log("Keyboard shown");
-    // Run any additional code here when the keyboard comes up
     scrollDown(0);
   };
 
   const handleMessageSend = () => {
-    console.log("HERE lol")
     const trimmedMessage = messageText.trim()
     if (trimmedMessage) {
-      console.log("HERE lol 2", currentUserUid, trimmedMessage, selectedChat.chatId, sessionKey)
       const socketMessage = {
         senderUid: currentUserUid,
         text: encryptMessage(trimmedMessage, sessionKey),
         chatId: selectedChat.chatId,
       };
-      console.log("HERE lol 3")
 
       socketInstance.emit("sendMessage", socketMessage);
-      console.log("HERE", socketMessage)
+
       const newMessage = {
         senderUid: currentUserUid,
         text: trimmedMessage,
       };
-
-      console.log("THERE", newMessage, selectedChat.messages, selectedChat)
 
       const updatedChat = {
         ...selectedChat,

@@ -13,7 +13,6 @@ export const ChatProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onValue(ref(db, "chats/"), (snapshot) => {
-      // console.log("kms")
       if (snapshot.exists()) {
         let chatsData = snapshot.val();
         const groupChatsArray = [];
@@ -32,13 +31,10 @@ export const ChatProvider = ({ children }) => {
             }
           }
         }
-        // console.log("here in chats onValue", selectedChat, selectedChat.chatId)
         setGroupChats(groupChatsArray);
         setDms(dmsArray);
 
-        if (chatsData[selectedChat.chatId].messages === 'undefined') chatsData[selectedChat.chatId].messages = []
-        // Check if selectedChat exists and if its chatId matches any in the updated data
-        // console.log("here in chats onValue", selectedChat, selectedChat.chatId, chatsData)
+
         if (
           selectedChat &&
           selectedChat.chatId &&

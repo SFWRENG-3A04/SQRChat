@@ -66,7 +66,6 @@ export default function Messages({ messages, currentUserUid, users }) {
   }, [isReactionsVisible]);
 
   const handleSelectReaction = (reaction) => {
-    console.log(selectedChat);
     const updatedReactions = {
       ...selectedChat.messages[selectedMessageIndex].reactions,
     };

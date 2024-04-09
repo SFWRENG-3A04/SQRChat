@@ -12,15 +12,14 @@ const decrypt = (encryptedMessage, secretKey) => {
 const encryptMessage = (message, secretKey) => {
   console.log("encrypt message", message, secretKey)
   const encrypted = encrypt(message, secretKey);
-  console.log("testing 1")
-  const test = encrypted.toString();
-  console.log("testing 2")
-  return test
+  console.log("encrypted message", encrypted)
+  return encrypted.toString();
 };
 
 const decryptMessage = (encryptedMessage, secretKey) => {
-  console.log("decrypt message", message, secretKey)
+  console.log("decrypt message", encryptedMessage, secretKey)
   const decrypted = decrypt(encryptedMessage, secretKey);
+  console.log("decrypted message", encrypted)
   return decrypted.toString(Utf8);
 };
 

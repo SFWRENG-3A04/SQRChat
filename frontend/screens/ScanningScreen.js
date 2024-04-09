@@ -32,8 +32,6 @@ export default function ScanningScreen({ navigation }) {
     setCameraPermission(cameraPermission.status === "granted");
 
     const imagePermission = await ImagePicker.getMediaLibraryPermissionsAsync();
-    // console.log("image: " + imagePermission.status);
-    // console.log("camera: " + cameraPermission.status);
 
     setGalleryPermission(imagePermission.status === "granted");
 
