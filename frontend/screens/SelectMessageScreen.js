@@ -221,18 +221,21 @@ export default function SelectMessageScreen({ navigation, users }) {
                   <TextInput
                     style={styles.input}
                     placeholder="Chat Picture URL"
+                    placeholderTextColor="gray"
                     onChangeText={setChatPictureInput}
                     value={chatPictureInput}
                   />
                   <TextInput
                     style={styles.input}
                     placeholder="Chat ID"
+                    placeholderTextColor="gray"
                     onChangeText={setChatIdInput}
                     value={chatIdInput}
                   />
                   <TextInput
                     style={styles.input}
                     placeholder="Display Name"
+                    placeholderTextColor="gray"
                     onChangeText={setDisplayNameInput}
                     value={displayNameInput}
                   />
