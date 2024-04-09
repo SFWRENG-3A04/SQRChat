@@ -152,9 +152,6 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingBottom: 20,
   },
-  changePassTextBox:{
-    backgroundColor: "#FFFFFF"
-  },
   button: {
     padding: 10,
     borderRadius: 5,
