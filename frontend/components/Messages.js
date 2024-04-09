@@ -13,13 +13,7 @@ import { ChatContext } from "../context/ChatContext";
 import { update } from "firebase/database";
 import { db, ref } from "../services/firebase";
 
-export default function Messages({
-  messages,
-  currentUserUid,
-  users,
-  setMessages,
-  socket,
-}) {
+export default function Messages({ messages, currentUserUid, users, socket }) {
   const { selectedChat } = useContext(ChatContext);
 
   const [isReactionsVisible, setIsReactionsVisible] = useState(false);
