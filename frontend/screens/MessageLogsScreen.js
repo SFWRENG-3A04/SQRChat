@@ -250,7 +250,7 @@ export default function MessageLogsScreen({ route }) {
       >
         <Messages
           users={users}
-          messages={selectedChat.messages}
+          messages={selectedChat.messages || []}
           currentUserUid={currentUserUid}
           socket={socketInstance}
         />
