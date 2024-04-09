@@ -1,13 +1,12 @@
-import React from "react";
+import React, { useState ,useEffect} from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { auth, db, ref } from "../services/firebase";
-import { getUser } from '../mock/functions';
 
 const Chat = ({ groupChats, onChatSelected, users }) => {
 
  const currentUserUid = auth.currentUser.uid;
+ 
 
- // Function to get user names from their UIDs
  const getUserNames = (participants) => {
   const filteredParticipants = participants.filter(uid => uid !== currentUserUid);
  
@@ -28,12 +27,19 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
    return user ? user.photoUrl : 'Unknown';
    };
 
-   
+   const getUserAvailability = (participants, currentUserUid) => {
+    const otherUser = participants.filter(uid => uid !== currentUserUid)[0];
+    const user = users.find((user) => user.uid === otherUser);
+    const userAvailabilityRef = ref(user, `users/${user.uid}/availability`);
+    return userAvailabilityRef;
+    };
+
+
+
  return (
     <View style={styles.listContainer}>
       {groupChats.map(chat => {
-        // Correctly placed console.log statement
-        console.log(chat.pictureURL);
+
 
         return (
           <TouchableOpacity
@@ -57,6 +63,11 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
               {chat.participants.length === 2 && (
                 <Text style={styles.participantsStyle}>
                  {getUserNames(chat.participants)}
+                </Text>
+              )}
+                            {chat.participants.length === 2 && (
+                <Text style={styles.availabilityStyle}>
+                 {getUserAvailability(chat.participants,currentUserUid)}
                 </Text>
               )}
               {chat.participants.length != 2 && (
