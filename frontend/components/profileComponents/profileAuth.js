@@ -18,12 +18,12 @@ const ProfileAuth = ({user}) => {
         await reauthenticateWithCredential(user, credential);
         await updatePassword(user, newPassword);
         console.log("Password updated successfully");
-        showNotification("Password updated successfully");
+        showNotification("Password updated successfully", "#77DD77");
         setCurrentPassword("");
         setNewPassword("");
       } catch (error) {
         console.log("Error updating password:", error.message);
-        showNotification("Error updating password");
+        showNotification("Error updating password", "#FF6961");
         setCurrentPassword("");
         setNewPassword("");
       }
@@ -33,8 +33,8 @@ const ProfileAuth = ({user}) => {
     scrollViewRef.current.scrollToEnd({ animated: true });
   }
 
-  const showNotification = (message) => {
-    setNotification(message);
+  const showNotification = (message, color) => {
+    setNotification({'message': message, 'color': color});
     setTimeout(() => {
       setNotification(null);
     }, 5000); // Hide notification after 3 seconds
@@ -78,8 +78,8 @@ const ProfileAuth = ({user}) => {
                 />
               </View>
               {notification && (
-                <View style={styles.notificationContainer}>
-                  <Text style={styles.notification}>{notification}</Text>
+                <View style={styles.notificationContainer} backgroundColor={notification['color']}>
+                  <Text style={styles.notification}>{notification['message']}</Text>
                 </View>
               )}
               <View style={styles.buttonContainer}>
