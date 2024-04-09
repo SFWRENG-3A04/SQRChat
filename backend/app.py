@@ -4,7 +4,7 @@ import base64
 from PIL import Image
 from io import BytesIO
 from firebase_admin import credentials, auth, initialize_app, db
-from flask_socketio import SocketIO, join_room, send
+from flask_socketio import SocketIO, join_room, send, emit
 import hashlib
 
 app = Flask(__name__)
@@ -21,9 +21,33 @@ def ping_pong(id):
   return 'pong ' + str(id+1)
 
 @socketio.on('joinRoom')
-def handle_join_room(room):
+def handle_join_room(data):
+  print("data, ", data)
+  userId = data['userId']
+  room = data['room']
   join_room(room)
-  print(f"Socket {request.sid} joined room {room}")
+  print(f"User {userId} joined room {room}")
+
+  try:
+    participants_ref = db.reference(f"chats/{room}/participants").get()
+
+    if participants_ref:
+      access_tokens = []
+
+      for participant_uid in participants_ref:
+        user_keys_ref = db.reference(f'keys/{participant_uid}').get()
+        if user_keys_ref and 'accessToken' in user_keys_ref:
+          access_tokens.append(user_keys_ref['accessToken'])
+
+      if access_tokens:
+        session_key = generate_session_key_sha256(access_tokens)
+        emit('sessionKey', {'key': session_key}, room=room)  # Emit to the whole room
+      else:
+        print("No access tokens found for participants in the room.")
+    else:
+      print(f"No participants found for room {room}")
+  except Exception as e:
+    print(f"Error retrieving participants for room {room}: {str(e)}")
 
 @socketio.on('sendMessage')
 def handle_send_message(message):
