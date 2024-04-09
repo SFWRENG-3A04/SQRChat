@@ -22,23 +22,23 @@ import { useNavigation } from "@react-navigation/native";
 // import { encryptMessage, decryptMessage } from "../services/encryption";
 
 const encrypt = (message, secretKey) => {
-  return secretKey + message
-}
+  return secretKey + message;
+};
 
 const decrypt = (encryptedMessage, secretKey) => {
-  return encryptedMessage.replace(secretKey, "")
-}
+  return encryptedMessage.replace(secretKey, "");
+};
 
 const encryptMessage = (message, secretKey) => {
   const encrypted = encrypt(message, secretKey);
-  console.log("encrypted message", encrypted, secretKey)
-  return encrypted//.toString();
+  console.log("encrypted message", encrypted, secretKey);
+  return encrypted; //.toString();
 };
 
 const decryptMessage = (encryptedMessage, secretKey) => {
   const decrypted = decrypt(encryptedMessage, secretKey);
-  console.log("decrypted message", decrypted, secretKey)
-  return decrypted//.toString(Utf8);
+  console.log("decrypted message", decrypted, secretKey);
+  return decrypted; //.toString(Utf8);
 };
 
 export default function MessageLogsScreen({ route }) {
@@ -51,7 +51,9 @@ export default function MessageLogsScreen({ route }) {
 
   const [socketInstance, setSocketInstance] = useState(null);
   const [messageText, setMessageText] = useState("");
-  const [sessionKey, setSessionKey] = useState(Math.floor(Math.random() * 100) + 1);
+  const [sessionKey, setSessionKey] = useState(
+    Math.floor(Math.random() * 100) + 1
+  );
 
   const scrollViewRef = useRef();
 
@@ -91,7 +93,7 @@ export default function MessageLogsScreen({ route }) {
   };
 
   const handleMessageSend = () => {
-    const trimmedMessage = messageText.trim()
+    const trimmedMessage = messageText.trim();
     if (trimmedMessage) {
       const socketMessage = {
         senderUid: currentUserUid,
@@ -170,7 +172,7 @@ export default function MessageLogsScreen({ route }) {
     socket.on("connect", () => {
       console.log("Socket connected");
       const chatid = selectedChat.chatId;
-      socket.emit("joinRoom", { "userId": currentUserUid, "room": chatid });
+      socket.emit("joinRoom", { userId: currentUserUid, room: chatid });
     });
 
     socket.on("message", (message) => {
@@ -237,11 +239,11 @@ export default function MessageLogsScreen({ route }) {
       }
     });
 
-    socket.on('sessionKey', (data) => {
-      console.log("before", sessionKey)
-      console.log('Received session key:', data.key);
+    socket.on("sessionKey", (data) => {
+      console.log("before", sessionKey);
+      console.log("Received session key:", data.key);
       setSessionKey(data.key);
-      console.log("after", sessionKey)
+      console.log("after", sessionKey);
     });
 
     setSocketInstance(socket);
@@ -270,9 +272,8 @@ export default function MessageLogsScreen({ route }) {
       >
         <Messages
           users={users}
-          messages={messages}
+          messages={selectedChat.messages}
           currentUserUid={currentUserUid}
-          setMessages={setMessages}
           socket={socketInstance}
         />
       </ScrollView>
