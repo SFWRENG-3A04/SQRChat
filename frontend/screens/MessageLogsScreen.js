@@ -19,6 +19,27 @@ import { backendEndpoint } from "../common/constants";
 import { ChatContext } from "../context/ChatContext";
 import { getDatabase, remove } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
+// import { encryptMessage, decryptMessage } from "../services/encryption";
+
+const encrypt = (message, secretKey) => {
+  return secretKey + message
+}
+
+const decrypt = (encryptedMessage, secretKey) => {
+  return encryptedMessage.replace(secretKey, "")
+}
+
+const encryptMessage = (message, secretKey) => {
+  const encrypted = encrypt(message, secretKey);
+  console.log("encrypted message", encrypted, secretKey)
+  return encrypted//.toString();
+};
+
+const decryptMessage = (encryptedMessage, secretKey) => {
+  const decrypted = decrypt(encryptedMessage, secretKey);
+  console.log("decrypted message", decrypted, secretKey)
+  return decrypted//.toString(Utf8);
+};
 
 export default function MessageLogsScreen({ route }) {
   const { users } = route.params;
@@ -30,6 +51,7 @@ export default function MessageLogsScreen({ route }) {
 
   const [socketInstance, setSocketInstance] = useState(null);
   const [messageText, setMessageText] = useState("");
+  const [sessionKey, setSessionKey] = useState(Math.floor(Math.random() * 100) + 1);
 
   const scrollViewRef = useRef();
 
@@ -47,6 +69,13 @@ export default function MessageLogsScreen({ route }) {
   }, []);
 
   useEffect(() => {
+    const chatTitle = selectedChat.displayName || "Private Chat";
+    navigation.setOptions({
+      title: chatTitle,
+    });
+  }, [selectedChat, navigation]);
+
+  useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       _keyboardDidShow
@@ -58,16 +87,15 @@ export default function MessageLogsScreen({ route }) {
   }, []);
 
   const _keyboardDidShow = () => {
-    console.log("Keyboard shown");
-    // Run any additional code here when the keyboard comes up
     scrollDown(0);
   };
 
   const handleMessageSend = () => {
-    if (messageText.trim()) {
+    const trimmedMessage = messageText.trim()
+    if (trimmedMessage) {
       const socketMessage = {
         senderUid: currentUserUid,
-        text: messageText.trim(),
+        text: encryptMessage(trimmedMessage, sessionKey),
         chatId: selectedChat.chatId,
         type: "textMessage",
       };
@@ -76,7 +104,7 @@ export default function MessageLogsScreen({ route }) {
 
       const newMessage = {
         senderUid: currentUserUid,
-        text: messageText.trim(),
+        text: trimmedMessage,
       };
 
       const updatedChat = {
@@ -141,21 +169,22 @@ export default function MessageLogsScreen({ route }) {
 
     socket.on("connect", () => {
       console.log("Socket connected");
-      socket.emit("joinRoom", selectedChat.chatId);
+      const chatid = selectedChat.chatId;
+      socket.emit("joinRoom", { "userId": currentUserUid, "room": chatid });
     });
 
     socket.on("message", (message) => {
-      console.log("Received message:", message);
+      console.log("Received message:", message, message.text, sessionKey);
       if (message.type === "textMessage") {
         syncedMessage = {
           senderUid: message.senderUid,
-          text: message.text,
+          text: decryptMessage(message.text, sessionKey),
         };
         setMessages((prevMessages) => [
           ...prevMessages,
           {
             senderUid: message.senderUid,
-            text: message.text,
+            text: decryptMessage(message.text, sessionKey),
           },
         ]);
         scrollViewRef.current.scrollToEnd({ animated: true });
@@ -206,6 +235,13 @@ export default function MessageLogsScreen({ route }) {
       }
     });
 
+    socket.on('sessionKey', (data) => {
+      console.log("before", sessionKey)
+      console.log('Received session key:', data.key);
+      setSessionKey(data.key);
+      console.log("after", sessionKey)
+    });
+
     setSocketInstance(socket);
 
     socket.on("disconnect", () => {
@@ -215,7 +251,7 @@ export default function MessageLogsScreen({ route }) {
     return function cleanup() {
       socket.disconnect();
     };
-  }, [selectedChat.chatId]);
+  }, [selectedChat.chatId, sessionKey]);
 
   return (
     <KeyboardAvoidingView

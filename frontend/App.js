@@ -6,10 +6,8 @@ import { logOut } from "./services/login";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Ionicons } from '@expo/vector-icons';
 
-import LandingScreen from "./screens/LandingScreen"; // Your login screen
+import LandingScreen from "./screens/LandingScreen"; // login
 import MessagesScreen from "./screens/MessagesScreen";
-import ScanningScreen from "./screens/ScanningScreen";
-import SettingsScreen from "./screens/SettingsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import ManageUsersScreen from "./screens/ManageUsersScreen";
 
@@ -58,11 +56,6 @@ export default function App() {
               component={MessagesScreen}
               options={{ title: "Messages" }}
             />
-            {/* <Tab.Screen
-              name="Scanning"
-              component={ScanningScreen}
-              options={{ title: "Scanning" }}
-            /> */}
             {isAdmin && (
               <Tab.Screen
                 name="ManageUsers"
@@ -70,11 +63,6 @@ export default function App() {
                 options={{ title: "Manage Users" }}
               />
             )}
-            {/* <Tab.Screen
-              name="Settings"
-              component={SettingsScreen}
-              options={{ title: "Settings Title" }}
-            /> */}
             <Tab.Screen
               name="Profile"
               children={() => (<ProfileScreen user={user} />)}
