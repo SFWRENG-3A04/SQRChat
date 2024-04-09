@@ -13,7 +13,7 @@ import { ChatContext } from "../context/ChatContext";
 import { update } from "firebase/database";
 import { db, ref } from "../services/firebase";
 
-export default function Messages({ messages, currentUserUid, users }) {
+export default function Messages({ messages, currentUserUid, users, socket }) {
   const { selectedChat } = useContext(ChatContext);
 
   const [isReactionsVisible, setIsReactionsVisible] = useState(false);
@@ -66,9 +66,17 @@ export default function Messages({ messages, currentUserUid, users }) {
   }, [isReactionsVisible]);
 
   const handleSelectReaction = (reaction) => {
-    console.log(selectedChat);
+    const socketMessage = {
+      selectedMessageIndex: selectedMessageIndex,
+      type: "reactToMessage",
+      chatId: selectedChat.chatId,
+      reaction: reaction,
+    };
+
+    socket.emit("sendMessage", socketMessage);
+
     const updatedReactions = {
-      ...selectedChat.messages[selectedMessageIndex].reactions,
+      ...(selectedChat.messages[selectedMessageIndex].reactions || {}),
     };
 
     if (
@@ -81,9 +89,10 @@ export default function Messages({ messages, currentUserUid, users }) {
       if (updatedReactions[reaction].length === 0) {
         delete updatedReactions[reaction];
       }
-    } else {
-      updatedReactions[reaction] = [];
+    } else if (updatedReactions[reaction]) {
       updatedReactions[reaction].push(currentUserUid);
+    } else {
+      updatedReactions[reaction] = [currentUserUid];
     }
 
     const updatedChat = {
@@ -114,6 +123,14 @@ export default function Messages({ messages, currentUserUid, users }) {
 
   const handleUnsend = () => {
     if (selectedMessageIndex !== null) {
+      const socketMessage = {
+        selectedMessageIndex: selectedMessageIndex,
+        type: "unsendMessage",
+        chatId: selectedChat.chatId,
+      };
+
+      socket.emit("sendMessage", socketMessage);
+
       const updatedMessages = [...selectedChat.messages];
       updatedMessages.splice(selectedMessageIndex, 1);
 

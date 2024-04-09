@@ -24,7 +24,6 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
   const getUserPhoto = (participants, currentUserUid) => {
    const otherUser = participants.filter(uid => uid !== currentUserUid)[0];
    const user = users.find((user) => user.uid === otherUser);
-   console.log(user);
    return user ? user.photoUrl : 'Unknown';
    };
 
@@ -33,7 +32,6 @@ const Chat = ({ groupChats, onChatSelected, users }) => {
     <View style={styles.listContainer}>
       {groupChats.map(chat => {
         // Correctly placed console.log statement
-        console.log(chat.pictureURL);
 
         return (
           <TouchableOpacity
